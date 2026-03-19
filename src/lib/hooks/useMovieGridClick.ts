@@ -1,6 +1,6 @@
 import {addFavorite, type FavoriteMovie, isFavoriteCheck, removeFavorite} from "../store/favoriteMovieStore.ts";
 import {type MouseEvent} from "react";
-import type {Movie} from "../../types/Movie.ts";
+import type {Movie} from "../../types/movie.ts";
 
 export default function useMovieGridClick(favoriteMovies: FavoriteMovie[], movies?: Movie[]) {
 

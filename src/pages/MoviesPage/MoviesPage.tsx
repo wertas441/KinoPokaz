@@ -1,7 +1,6 @@
 import styles from "./MoviesPage.module.css";
-import type { Movie } from "../../types/Movie.ts";
 import MovieCard from "../../components/UI/MovieCard/MovieCard.tsx";
-import { useMemo } from "react";
+import {useLayoutEffect, useMemo, useState} from "react";
 import { useUnit } from "effector-react";
 import {
     $favoriteMovies,
@@ -10,17 +9,13 @@ import {
 import {useMovieFilter} from "../../lib/hooks/useMovieFilter.ts";
 import useMovieGridClick from "../../lib/hooks/useMovieGridClick.ts";
 import MovieFilter from "../../components/UI/movieFilter/MovieFilter.tsx";
-
-const movies: Movie[] = [
-    { id: 1, title: "Интерстеллар", year: 2014, rating: 8.6, poster: "...", genres: ["Фантастика", "Драма"] },
-    { id: 2, title: "Дюна", year: 2021, rating: 8.1, poster: "...", genres: ["Фантастика", "Приключения"] },
-    { id: 3, title: "Начало", year: 2010, rating: 8.8, poster: "...", genres: ["Фантастика", "Триллер"] },
-    { id: 4, title: "Одержимость", year: 2014, rating: 8.5, poster: "...", genres: ["Драма", "Музыка"] },
-    { id: 5, title: "Бегущий по лезвию 2049", year: 2017, rating: 8.0, poster: "...", genres: ["Фантастика", "Триллер"] },
-    { id: 6, title: "Гранд Будапешт", year: 2014, rating: 8.1, poster: "...", genres: ["Комедия", "Драма"] },
-];
+import {getMovieList} from "../../lib/controllers/movie.ts";
+import type {Movie} from "../../types/movie.ts";
 
 export default function MoviesPage() {
+
+    const [movies, setMovies] = useState<Movie[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const favoriteMovies = useUnit($favoriteMovies);
 
@@ -34,6 +29,22 @@ export default function MoviesPage() {
         sortBy,
         updateSearchParam,
     } = useMovieFilter();
+
+    useLayoutEffect(() => {
+        const getData = async () => {
+            setIsLoading(true);
+
+            try {
+                const data = await getMovieList(1, 10);
+
+                setMovies(data);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        void getData();
+    }, []);
 
     const gridClickHandler = useMovieGridClick(favoriteMovies, movies);
 
@@ -58,7 +69,7 @@ export default function MoviesPage() {
                 return 0;
             });
 
-    }, [nameFilter, genresFilter, fromYearFilter, toYearFilter, fromRatingFilter, toRatingFilter, sortBy]);
+    }, [movies, nameFilter, genresFilter, fromYearFilter, toYearFilter, fromRatingFilter, toRatingFilter, sortBy]);
 
     return (
         <main className={styles.page}>
@@ -67,38 +78,64 @@ export default function MoviesPage() {
                 <MovieFilter />
 
                 <section className={styles.content}>
-                    <div className={styles.contentHeader}>
-                        <h2 className={styles.contentTitle}>Найдено: {filteredMovies.length}</h2>
-                        <div className={styles.sort}>
-                            <span className={styles.sortLabel}>Сортировка</span>
 
-                            <select
-                                className={styles.select}
-                                value={sortBy}
-                                onChange={(e) => updateSearchParam("sort", e.target.value)}
-                            >
+                    {!isLoading && (
+                        <div className={styles.contentHeader}>
+                            <h2 className={styles.contentTitle}>
+                                Найдено: {filteredMovies.length}
+                            </h2>
 
-                                <option value="rating">по рейтингу</option>
-                                <option value="year">по году</option>
-                                <option value="title">по названию</option>
-                            </select>
+                            <div className={styles.sort}>
+                                <span className={styles.sortLabel}>Сортировка</span>
+
+                                <select
+                                    className={styles.select}
+                                    value={sortBy}
+                                    disabled={isLoading}
+                                    onChange={(e) => updateSearchParam("sort", e.target.value)}
+                                >
+
+                                    <option value="rating">по рейтингу</option>
+                                    <option value="year">по году</option>
+                                    <option value="title">по названию</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
+                    )}
 
-                    <div
-                        className={`${styles.grid} ${filteredMovies.length === 1 ? styles.gridSingle : ""}`}
-                        onClick={gridClickHandler}
-                    >
-                        {filteredMovies.map(movie => (
-                            <MovieCard
-                                key={movie.id}
-                                {...movie}
-                                isFavorite={isFavoriteCheck(movie.id, favoriteMovies)}
-                            />
-                        ))}
-                    </div>
 
-                    {filteredMovies.length === 0 && <p className={styles.empty}>По вашему запросу ничего не найдено</p>}
+                    {isLoading ? (
+                        <div
+                            className={styles.loaderWrap}
+                            role="status"
+                            aria-live="polite"
+                            aria-busy="true"
+                            aria-label="Загрузка списка фильмов"
+                        >
+                            <div className={styles.spinner} aria-hidden />
+
+                            <p className={styles.loaderText}>Загружаем подборку…</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div
+                                className={`${styles.grid} ${filteredMovies.length === 1 ? styles.gridSingle : ""}`}
+                                onClick={gridClickHandler}
+                            >
+                                {filteredMovies.map(movie => (
+                                    <MovieCard
+                                        key={movie.id}
+                                        {...movie}
+                                        isFavorite={isFavoriteCheck(movie.id, favoriteMovies)}
+                                    />
+                                ))}
+                            </div>
+
+                            {filteredMovies.length === 0 && (
+                                <p className={styles.empty}>По вашему запросу ничего не найдено</p>
+                            )}
+                        </>
+                    )}
                 </section>
             </div>
         </main>
