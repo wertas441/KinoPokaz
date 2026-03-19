@@ -1,35 +1,26 @@
 import {api, showErrorMessage} from "../index.ts";
-import type {Movie} from "../../types/movie.ts";
-
-interface MovieListDoc {
-    id: number;
-    name: string;
-    year: number;
-    rating: {
-        kp: number;
-        imdb: number
-    };
-    poster: {
-        url?: string;
-        previewUrl?: string
-    };
-}
+import type {Movie, MovieListDoc, MovieListPage, MovieListResponse} from "../../types/movie.ts";
 
 function mapListDocToMovie(doc: MovieListDoc): Movie {
-    const rating = doc.rating.kp > 0 ? doc.rating.kp : doc.rating.imdb;
+    const kp = doc.rating?.kp ?? 0;
+    const imdb = doc.rating?.imdb ?? 0;
+    let rating = kp > 0 ? kp : imdb;
+
+    if (!Number.isFinite(rating)) rating = 0;
+
     const poster = doc.poster?.url ?? doc.poster?.previewUrl ?? '';
 
     return {
         id: doc.id,
-        title: doc.name,
-        year: doc.year,
+        title: doc.name ?? '',
+        year: doc.year ?? 0,
         rating,
         poster,
         genres: [],
     };
 }
 
-export async function getMovieList(pageNumber: number, limitNumber: number): Promise<Movie[]> {
+export async function getMovieList(pageNumber: number, limitNumber: number): Promise<MovieListPage> {
 
     const query = [
         `/movie?page=${pageNumber}`,
@@ -42,20 +33,28 @@ export async function getMovieList(pageNumber: number, limitNumber: number): Pro
         `notNullFields=poster.url`,
         `sortField=rating.kp`,
         `sortType=-1`,
-    ].join('&')
+    ].join('&');
 
     try {
-        const response = await api.get<{ docs: MovieListDoc[] }>(query);
+        const { data } = await api.get<MovieListResponse>(query);
 
-        const docs = response.data?.docs;
+        const docs = Array.isArray(data?.docs) ? data.docs : [];
 
-        if (!Array.isArray(docs) || docs.length === 0) return [];
-
-        return docs.map(mapListDocToMovie);
+        return {
+            movies: docs.map(mapListDocToMovie),
+            page: data?.page ?? pageNumber,
+            pages: data?.pages ?? 0,
+            total: data?.total ?? 0,
+        };
     } catch (error) {
         if (showErrorMessage) console.error('Ошибка получения списка фильмов', error);
 
-        return [];
+        return {
+            movies: [],
+            page: pageNumber,
+            pages: pageNumber,
+            total: 0,
+        };
     }
 }
 

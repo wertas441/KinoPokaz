@@ -37,7 +37,7 @@ export default function MovieCard({id, poster, title, year, rating, isFavorite}:
                 )}
 
                 <span className={styles.rating}>
-                    {rating.toFixed(1)}
+                    {Number.isFinite(rating) ? rating.toFixed(1) : '—'}
                 </span>
             </div>
 

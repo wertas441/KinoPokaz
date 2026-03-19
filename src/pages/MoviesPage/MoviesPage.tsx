@@ -1,6 +1,6 @@
 import styles from "./MoviesPage.module.css";
 import MovieCard from "../../components/UI/MovieCard/MovieCard.tsx";
-import {useLayoutEffect, useMemo, useState} from "react";
+import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
 import { useUnit } from "effector-react";
 import {
     $favoriteMovies,
@@ -12,10 +12,22 @@ import MovieFilter from "../../components/UI/movieFilter/MovieFilter.tsx";
 import {getMovieList} from "../../lib/controllers/movie.ts";
 import type {Movie} from "../../types/movie.ts";
 
+const PAGE_SIZE = 50;
+const LOAD_AHEAD_PX = "400px";
+
 export default function MoviesPage() {
 
     const [movies, setMovies] = useState<Movie[]>([]);
+
+    const [totalInCatalog, setTotalInCatalog] = useState(0);
+    const [listPage, setListPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+    const loadMoreLock = useRef(false);
+    const sentinelRef = useRef<HTMLDivElement>(null);
 
     const favoriteMovies = useUnit($favoriteMovies);
 
@@ -31,27 +43,61 @@ export default function MoviesPage() {
     } = useMovieFilter();
 
     useLayoutEffect(() => {
+        let cancelled = false;
+
         const getData = async () => {
             setIsLoading(true);
 
             try {
-                const data = await getMovieList(1, 10);
+                const { movies, pages, page, total } = await getMovieList(1, PAGE_SIZE);
+                if (cancelled) return;
 
-                setMovies(data);
+                setMovies(movies);
+                setListPage(page);
+                setHasMore(pages > 0 && page < pages && movies.length > 0);
+                setTotalInCatalog(total);
             } finally {
-                setIsLoading(false);
+                if (!cancelled) setIsLoading(false);
             }
         };
 
         void getData();
+
+        return () => {
+            cancelled = true;
+        };
     }, []);
+
+    const loadNextPage = useCallback(async () => {
+        if (loadMoreLock.current || !hasMore || isLoading || isLoadingMore) return;
+
+        loadMoreLock.current = true;
+        setIsLoadingMore(true);
+
+        try {
+            const { movies, pages, page, total } = await getMovieList(listPage + 1, PAGE_SIZE);
+
+            setMovies((prev) => {
+                return [...prev, ...movies];
+            });
+
+            setListPage(page);
+            setHasMore(pages > 0 && page < pages && movies.length > 0);
+
+            if (total > 0) setTotalInCatalog(total);
+        } finally {
+            loadMoreLock.current = false;
+
+            setIsLoadingMore(false);
+        }
+    }, [hasMore, isLoading, isLoadingMore, listPage]);
 
     const gridClickHandler = useMovieGridClick(favoriteMovies, movies);
 
     const filteredMovies = useMemo(() => {
         return movies
             .filter((movie) => {
-                const matchesName = movie.title.toLowerCase().includes(nameFilter.toLowerCase());
+                const matchesName = (movie.title ?? '').toLowerCase().includes(nameFilter.toLowerCase());
                 const matchesGenre = genresFilter.length === 0 || movie.genres?.some(g => genresFilter.includes(g));
 
                 const matchesFromYear = fromYearFilter === "" || movie.year >= parseInt(fromYearFilter);
@@ -65,11 +111,32 @@ export default function MoviesPage() {
             .sort((a, b) => {
                 if (sortBy === "rating") return b.rating - a.rating;
                 if (sortBy === "year") return b.year - a.year;
-                if (sortBy === "title") return a.title.localeCompare(b.title);
+                if (sortBy === "title") return (a.title ?? '').localeCompare(b.title ?? '', 'ru');
                 return 0;
             });
 
     }, [movies, nameFilter, genresFilter, fromYearFilter, toYearFilter, fromRatingFilter, toRatingFilter, sortBy]);
+
+    useEffect(() => {
+        if (isLoading || !hasMore) return;
+
+        const node = sentinelRef.current;
+        if (!node) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const [entry] = entries;
+                
+                if (entry?.isIntersecting) void loadNextPage();
+            },
+
+            {root: null, rootMargin: LOAD_AHEAD_PX, threshold: 0},
+        );
+
+        observer.observe(node);
+
+        return () => observer.disconnect();
+    }, [isLoading, hasMore, loadNextPage, filteredMovies.length, movies.length]);
 
     return (
         <main className={styles.page}>
@@ -81,9 +148,17 @@ export default function MoviesPage() {
 
                     {!isLoading && (
                         <div className={styles.contentHeader}>
-                            <h2 className={styles.contentTitle}>
-                                Найдено: {filteredMovies.length}
-                            </h2>
+                            <div className={styles.contentHeaderTitles}>
+                                <h2 className={styles.contentTitle}>
+                                    Найдено: {filteredMovies.length}
+                                </h2>
+
+                                {totalInCatalog > 0 && (
+                                    <p className={styles.contentSubtitle}>
+                                        В каталоге {totalInCatalog.toLocaleString()} фильмов · в ленте {movies.length}
+                                    </p>
+                                )}
+                            </div>
 
                             <div className={styles.sort}>
                                 <span className={styles.sortLabel}>Сортировка</span>
@@ -133,6 +208,32 @@ export default function MoviesPage() {
 
                             {filteredMovies.length === 0 && (
                                 <p className={styles.empty}>По вашему запросу ничего не найдено</p>
+                            )}
+
+                            {hasMore && (
+                                <div
+                                    ref={sentinelRef}
+                                    className={styles.scrollSentinel}
+                                    aria-hidden
+                                />
+                            )}
+
+                            {isLoadingMore && hasMore && (
+                                <div
+                                    className={styles.loadMoreStatus}
+                                    role="status"
+                                    aria-live="polite"
+                                    aria-busy="true"
+                                    aria-label="Загрузка следующих фильмов"
+                                >
+                                    <div className={`${styles.spinner} ${styles.spinnerSmall}`} aria-hidden />
+
+                                    <p className={styles.loadMoreText}>Подгружаем ещё…</p>
+                                </div>
+                            )}
+
+                            {!hasMore && movies.length > 0 && (
+                                <p className={styles.endHint}>Вы дошли до конца подборки</p>
                             )}
                         </>
                     )}
