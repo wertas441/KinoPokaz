@@ -2,7 +2,6 @@ import styles from "./MoviesPage.module.css";
 import type { Movie } from "../../types/Movie.ts";
 import MovieCard from "../../components/UI/MovieCard/MovieCard.tsx";
 import { useMemo } from "react";
-import FilterInput from "../../components/inputs/FIlterInput/FilterInput.tsx";
 import { useUnit } from "effector-react";
 import {
     $favoriteMovies,
@@ -10,6 +9,7 @@ import {
 } from "../../lib/store/favoriteMovieStore.ts";
 import {useMovieFilter} from "../../lib/hooks/useMovieFilter.ts";
 import useMovieGridClick from "../../lib/hooks/useMovieGridClick.ts";
+import MovieFilter from "../../components/UI/movieFilter/MovieFilter.tsx";
 
 const movies: Movie[] = [
     { id: 1, title: "Интерстеллар", year: 2014, rating: 8.6, poster: "...", genres: ["Фантастика", "Драма"] },
@@ -33,8 +33,6 @@ export default function MoviesPage() {
         toRatingFilter,
         sortBy,
         updateSearchParam,
-        handleGenreChange,
-        clearSearchParams,
     } = useMovieFilter();
 
     const gridClickHandler = useMovieGridClick(favoriteMovies, movies);
@@ -65,81 +63,8 @@ export default function MoviesPage() {
     return (
         <main className={styles.page}>
             <div className={styles.container}>
-                <aside className={styles.filter}>
-                    <div className={styles.filterHeader}>
-                        <h2 className={styles.filterTitle}>Фильтры</h2>
 
-                        <button
-                            type="button"
-                            className={styles.resetButton}
-                            onClick={clearSearchParams}
-                        >
-                            Сбросить
-                        </button>
-                    </div>
-
-                    <FilterInput
-                        id="nameFilter"
-                        placeholder="Поиск по названию..."
-                        value={nameFilter}
-                        onChange={(val) => updateSearchParam("name", val)}
-                    />
-
-                    <div className={styles.filterSection}>
-                        <span className={styles.label}>Жанры</span>
-                        <div className={styles.checkboxList}>
-                            {["Фантастика", "Драма", "Приключения", "Триллер"].map(genre => (
-                                <label key={genre} className={styles.checkbox}>
-                                    <input
-                                        type="checkbox"
-                                        checked={genresFilter.includes(genre)}
-                                        onChange={() => handleGenreChange(genre)}
-                                    />
-
-                                    {genre}
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className={styles.filterSection}>
-                        <span className={styles.label}>Год выпуска</span>
-                        <div className={styles.yearRow}>
-                            <FilterInput
-                                id="fromYearFilter"
-                                placeholder="От 1990"
-                                value={fromYearFilter}
-                                onChange={(val) => updateSearchParam("from", val)}
-                            />
-
-                            <FilterInput
-                                id="toYearFilter"
-                                placeholder={`До 2026`}
-                                value={toYearFilter}
-                                onChange={(val) => updateSearchParam("to", val)}
-                            />
-                        </div>
-                    </div>
-
-                    <div className={styles.filterSection}>
-                        <span className={styles.label}>Рейтинг</span>
-                        <div className={styles.yearRow}>
-                            <FilterInput
-                                id="fromRatingFilter"
-                                placeholder="От 0"
-                                value={fromRatingFilter}
-                                onChange={(val) => updateSearchParam("fromRating", val)}
-                            />
-
-                            <FilterInput
-                                id="toYearFilter"
-                                placeholder={`До 10`}
-                                value={toRatingFilter}
-                                onChange={(val) => updateSearchParam("toRating", val)}
-                            />
-                        </div>
-                    </div>
-                </aside>
+                <MovieFilter />
 
                 <section className={styles.content}>
                     <div className={styles.contentHeader}>
@@ -154,9 +79,7 @@ export default function MoviesPage() {
                             >
 
                                 <option value="rating">по рейтингу</option>
-
                                 <option value="year">по году</option>
-
                                 <option value="title">по названию</option>
                             </select>
                         </div>

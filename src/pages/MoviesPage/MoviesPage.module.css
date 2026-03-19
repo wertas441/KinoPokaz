@@ -12,53 +12,6 @@
     align-items: start;
 }
 
-.filter {
-    background: var(--surface-color);
-    border-radius: var(--radius-l);
-    padding: var(--space-l);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-l);
-    border: 1px solid rgba(129, 140, 153, 0.15);
-    height: fit-content;
-    width: 100%;
-    align-self: start;
-    max-height: calc(100vh - 120px);
-    min-width: 0;
-    box-sizing: border-box;
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-gutter: stable;
-}
-
-.filterHeader {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-m);
-    flex-wrap: wrap;
-}
-
-.filterTitle {
-    margin: 0;
-    font-size: 20px;
-}
-
-.resetButton {
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    cursor: pointer;
-    font-size: 14px;
-    white-space: nowrap;
-    padding: 0;
-}
-
-.resetButton:hover,
-.resetButton:focus-visible {
-    color: var(--text-primary);
-}
-
 .select {
     border: 1px solid rgba(129, 140, 153, 0.2);
     border-radius: var(--radius-s);
@@ -66,57 +19,6 @@
     padding: 10px 12px;
     color: var(--text-primary);
     font-size: 14px;
-}
-
-.input::placeholder {
-    color: rgba(129, 140, 153, 0.7);
-}
-
-.checkboxList {
-    display: grid;
-    gap: var(--space-s);
-}
-
-.checkbox {
-    display: flex;
-    align-items: center;
-    gap: var(--space-s);
-    font-size: 14px;
-    color: var(--text-primary);
-    min-width: 0;
-}
-
-.checkbox input {
-    accent-color: var(--primary-color);
-}
-
-.yearDivider {
-    color: var(--text-secondary);
-}
-
-.range {
-    accent-color: var(--primary-color);
-}
-
-.rangeValue {
-    font-size: 14px;
-    color: var(--text-primary);
-}
-
-.applyButton {
-    border: none;
-    background: var(--primary-color);
-    color: var(--white);
-    padding: 12px 16px;
-    border-radius: var(--radius-m);
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--ease);
-}
-
-.applyButton:hover,
-.applyButton:focus-visible {
-    background: var(--primary-hover);
 }
 
 .content {
@@ -167,28 +69,6 @@
     grid-template-columns: minmax(250px, 340px);
 }
 
-.yearRow {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    min-width: 0;
-}
-
-.yearRow > * {
-    min-width: 0;
-}
-
-.filterSection {
-    display: grid;
-    gap: var(--space-s);
-    min-width: 0;
-}
-
-.label {
-    color: var(--text-secondary);
-    font-size: 13px;
-}
-
 .empty {
     margin: 0;
     color: var(--text-secondary);
@@ -205,12 +85,6 @@
 @media (max-width: 980px) {
     .container {
         grid-template-columns: 1fr;
-    }
-
-    .filter {
-        position: static;
-        max-height: none;
-        overflow: visible;
     }
 }
 

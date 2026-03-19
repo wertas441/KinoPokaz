@@ -26,3 +26,28 @@ export async function getMovieList(pageNumber: number, limitNumber: number) {
         return undefined;
     }
 }
+
+export async function getMovieDetails(id: string) {
+
+    const query = `/movie?id=${id}
+    &selectFields=name
+    &selectFields=description
+    &selectFields=rating
+    &selectFields=year
+    &selectFields=genres
+    &selectFields=poster
+    &selectFields=premiere
+    `
+
+    try {
+        const response = await api.get(query);
+
+        if (response.data.docs.length === 0) return undefined;
+
+        return response.data.docs;
+    } catch (error){
+        if (showErrorMessage) console.error('Ошибка получения подробной информации о фильме', error);
+
+        return undefined;
+    }
+}

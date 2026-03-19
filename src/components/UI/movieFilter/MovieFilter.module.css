@@ -1,0 +1,95 @@
+.filter {
+    background: var(--surface-color);
+    border-radius: var(--radius-l);
+    padding: var(--space-l);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-l);
+    border: 1px solid rgba(129, 140, 153, 0.15);
+    top: 96px;
+    height: fit-content;
+    width: 100%;
+    align-self: start;
+    max-height: calc(100vh - 120px);
+    min-width: 0;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+}
+
+.filterHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-m);
+    flex-wrap: wrap;
+}
+
+.filterTitle {
+    margin: 0;
+    font-size: 20px;
+}
+
+.resetButton {
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+    padding: 0;
+}
+
+.resetButton:hover,
+.resetButton:focus-visible {
+    color: var(--text-primary);
+}
+
+.filterSection {
+    display: grid;
+    gap: var(--space-s);
+    min-width: 0;
+}
+
+.label {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.checkboxList {
+    display: grid;
+    gap: var(--space-s);
+}
+
+.checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    font-size: 14px;
+    color: var(--text-primary);
+    min-width: 0;
+}
+
+.checkbox input {
+    accent-color: var(--primary-color);
+}
+
+.yearRow {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    min-width: 0;
+}
+
+.yearRow > * {
+    min-width: 0;
+}
+
+@media (max-width: 980px) {
+    .filter {
+        position: static;
+        max-height: none;
+        overflow: visible;
+    }
+}
