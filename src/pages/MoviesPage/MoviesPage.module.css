@@ -8,7 +8,8 @@
     margin: 0 auto;
     display: grid;
     grid-template-columns: 300px minmax(0, 1fr);
-    gap: var(--space-xl);
+    gap: 100px;
+    align-items: start;
 }
 
 .filter {
@@ -19,9 +20,15 @@
     flex-direction: column;
     gap: var(--space-l);
     border: 1px solid rgba(129, 140, 153, 0.15);
-    position: sticky;
-    top: 96px;
     height: fit-content;
+    width: 100%;
+    align-self: start;
+    max-height: calc(100vh - 120px);
+    min-width: 0;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
 }
 
 .filterHeader {
@@ -29,6 +36,7 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-m);
+    flex-wrap: wrap;
 }
 
 .filterTitle {
@@ -42,6 +50,8 @@
     color: var(--text-secondary);
     cursor: pointer;
     font-size: 14px;
+    white-space: nowrap;
+    padding: 0;
 }
 
 .resetButton:hover,
@@ -73,16 +83,11 @@
     gap: var(--space-s);
     font-size: 14px;
     color: var(--text-primary);
+    min-width: 0;
 }
 
 .checkbox input {
     accent-color: var(--primary-color);
-}
-
-.yearRow {
-    display: flex;
-    align-items: center;
-    gap: var(--space-s);
 }
 
 .yearDivider {
@@ -118,6 +123,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-l);
+    min-width: 0;
 }
 
 .contentHeader {
@@ -152,26 +158,69 @@
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: var(--space-l);
+    align-items: stretch;
+}
+
+.gridSingle {
+    grid-template-columns: minmax(250px, 340px);
 }
 
 .yearRow {
-    display: flex;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
+    min-width: 0;
 }
-.yearRow input {
-    width: 100%; /* Чтобы они делили пространство поровну */
+
+.yearRow > * {
+    min-width: 0;
+}
+
+.filterSection {
+    display: grid;
+    gap: var(--space-s);
+    min-width: 0;
+}
+
+.label {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.empty {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 15px;
 }
 
 @media (max-width: 1100px) {
+    .container {
+        gap: var(--space-l);
+        grid-template-columns: 300px minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 980px) {
     .container {
         grid-template-columns: 1fr;
     }
 
     .filter {
         position: static;
+        max-height: none;
+        overflow: visible;
+    }
+}
+
+@media (max-width: 860px) {
+    .grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+
+    .gridSingle {
+        grid-template-columns: minmax(220px, 320px);
     }
 }
 
@@ -180,8 +229,8 @@
         padding: var(--space-l) var(--space-m);
     }
 
-    .cardBody {
-        flex-direction: column;
-        align-items: flex-start;
+    .grid,
+    .gridSingle {
+        grid-template-columns: 1fr;
     }
 }
