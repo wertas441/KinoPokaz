@@ -1,8 +1,12 @@
 import styles from './MovieCard.module.css'
-import type {Movie} from "../../../types/Movie.ts";
 import { useMemo, useState } from "react";
 
-interface IProps extends Movie {
+interface IProps {
+    id: number;
+    title: string;
+    year: number;
+    rating: number;
+    poster: string;
     isFavorite: boolean;
 }
 
@@ -32,7 +36,9 @@ export default function MovieCard({id, poster, title, year, rating, isFavorite}:
                     </div>
                 )}
 
-                <span className={styles.rating}>{rating.toFixed(1)}</span>
+                <span className={styles.rating}>
+                    {rating.toFixed(1)}
+                </span>
             </div>
 
             <div className={styles.cardBody}>

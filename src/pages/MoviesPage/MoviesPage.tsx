@@ -1,16 +1,15 @@
 import styles from "./MoviesPage.module.css";
 import type { Movie } from "../../types/Movie.ts";
 import MovieCard from "../../components/UI/MovieCard/MovieCard.tsx";
-import { useMemo, type MouseEvent } from "react";
+import { useMemo } from "react";
 import FilterInput from "../../components/inputs/FIlterInput/FilterInput.tsx";
-import { useSearchParams } from "react-router";
 import { useUnit } from "effector-react";
 import {
     $favoriteMovies,
-    addFavorite,
     isFavoriteCheck,
-    removeFavorite
 } from "../../lib/store/favoriteMovieStore.ts";
+import {useMovieFilter} from "../../lib/hooks/useMovieFilter.ts";
+import useMovieGridClick from "../../lib/hooks/useMovieGridClick.ts";
 
 const movies: Movie[] = [
     { id: 1, title: "Интерстеллар", year: 2014, rating: 8.6, poster: "...", genres: ["Фантастика", "Драма"] },
@@ -23,41 +22,22 @@ const movies: Movie[] = [
 
 export default function MoviesPage() {
 
-    const [searchParams, setSearchParams] = useSearchParams();
     const favoriteMovies = useUnit($favoriteMovies);
 
-    const nameFilter = searchParams.get("name") || "";
-    const genresFilter = searchParams.getAll("genre");
-    const fromYearFilter = searchParams.get("from") || "";
-    const toYearFilter = searchParams.get("to") || "";
-    const fromRatingFilter = searchParams.get("fromRating") || "";
-    const toRatingFilter = searchParams.get("toRating") || "";
+    const {
+        nameFilter,
+        genresFilter,
+        fromYearFilter,
+        toYearFilter,
+        fromRatingFilter,
+        toRatingFilter,
+        sortBy,
+        updateSearchParam,
+        handleGenreChange,
+        clearSearchParams,
+    } = useMovieFilter();
 
-    const sortBy = searchParams.get("sort") || "rating";
-
-    const updateSearchParam = (key: string, value: string | string[] | number) => {
-        const newParams = new URLSearchParams(searchParams);
-
-        if (value === "") {
-            newParams.delete(key);
-        } else if (Array.isArray(value)) {
-            newParams.delete(key);
-
-            value.forEach(v => newParams.append(key, v));
-        } else {
-            newParams.set(key, String(value));
-        }
-
-        setSearchParams(newParams);
-    };
-
-    const handleGenreChange = (genre: string) => {
-        const nextGenres = genresFilter.includes(genre)
-            ? genresFilter.filter(g => g !== genre)
-            : [...genresFilter, genre];
-
-        updateSearchParam("genre", nextGenres);
-    };
+    const gridClickHandler = useMovieGridClick(favoriteMovies, movies);
 
     const filteredMovies = useMemo(() => {
         return movies
@@ -82,29 +62,6 @@ export default function MoviesPage() {
 
     }, [nameFilter, genresFilter, fromYearFilter, toYearFilter, fromRatingFilter, toRatingFilter, sortBy]);
 
-    const handleGridClick = (event: MouseEvent<HTMLDivElement>) => {
-        const target = event.target as HTMLElement;
-        const favoriteButton = target.closest<HTMLButtonElement>('button[data-action="toggle-favorite"]');
-        const movieCard = favoriteButton?.closest<HTMLElement>("[data-movie-id]");
-
-        const movieId = Number(movieCard?.dataset.movieId);
-        const movie = movies.find((item) => item.id === movieId);
-        if (!movie) return;
-
-        if (isFavoriteCheck(movieId, favoriteMovies)) {
-            removeFavorite(movieId);
-            return;
-        }
-
-        addFavorite({
-            id: movie.id,
-            title: movie.title,
-            year: movie.year,
-            poster: movie.poster,
-            rating: movie.rating,
-        });
-    };
-
     return (
         <main className={styles.page}>
             <div className={styles.container}>
@@ -115,7 +72,7 @@ export default function MoviesPage() {
                         <button
                             type="button"
                             className={styles.resetButton}
-                            onClick={() => setSearchParams({})}
+                            onClick={clearSearchParams}
                         >
                             Сбросить
                         </button>
@@ -207,7 +164,7 @@ export default function MoviesPage() {
 
                     <div
                         className={`${styles.grid} ${filteredMovies.length === 1 ? styles.gridSingle : ""}`}
-                        onClick={handleGridClick}
+                        onClick={gridClickHandler}
                     >
                         {filteredMovies.map(movie => (
                             <MovieCard
