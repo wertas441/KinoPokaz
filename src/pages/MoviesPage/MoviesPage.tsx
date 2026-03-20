@@ -1,5 +1,5 @@
 import styles from "./MoviesPage.module.css";
-import MovieCard from "../../components/UI/MovieCard/MovieCard.tsx";
+import MovieCard from "../../components/UI/movieCard/MovieCard.tsx";
 import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
 import { useUnit } from "effector-react";
 import {
@@ -10,7 +10,7 @@ import {
 import {useMovieFilter} from "../../lib/hooks/useMovieFilter.ts";
 import useMovieGridClick from "../../lib/hooks/useMovieGridClick.ts";
 import { useModalWindow } from "../../lib/hooks/useModalWindow.ts";
-import ModalWindow from "../../components/UI/ModalWindow/ModalWindow.tsx";
+import ModalWindow from "../../components/UI/modalWindow/ModalWindow.tsx";
 import MovieFilter from "../../components/UI/movieFilter/MovieFilter.tsx";
 import {getMovieList} from "../../lib/controllers/movie.ts";
 import type {Movie} from "../../types/movie.ts";

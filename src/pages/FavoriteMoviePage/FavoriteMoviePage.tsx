@@ -1,5 +1,5 @@
 import { useUnit } from "effector-react";
-import MovieCard from "../../components/UI/MovieCard/MovieCard.tsx";
+import MovieCard from "../../components/UI/movieCard/MovieCard.tsx";
 import styles from "./FavoriteMoviePage.module.css";
 import { $favoriteMovies, resetFavorites } from "../../lib/store/favoriteMovieStore.ts";
 import useMovieGridClick from "../../lib/hooks/useMovieGridClick.ts";

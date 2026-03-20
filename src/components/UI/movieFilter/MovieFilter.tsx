@@ -1,4 +1,4 @@
-import FilterInput from "../../inputs/FIlterInput/FilterInput.tsx";
+import FilterInput from "../../inputs/filterInput/FilterInput.tsx";
 import styles from "./MovieFilter.module.css";
 import {useMovieFilter} from "../../../lib/hooks/useMovieFilter.ts";
 import {MOVIE_GENRE_OPTIONS} from "../../../lib/movieGenres.ts";

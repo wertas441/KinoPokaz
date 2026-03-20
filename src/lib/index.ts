@@ -16,6 +16,12 @@ export const api = axios.create({
     },
 });
 
+export const appNavItems = [
+    { id: 1, label: "Главная", to: "/"},
+    { id: 2, label: "Каталог", to: "/movies"},
+    { id: 3, label: "Избранное", to: "/favorites"},
+] as const;
+
 export function formatPremiereDate(iso?: string): string | undefined {
     if (!iso) return undefined;
 

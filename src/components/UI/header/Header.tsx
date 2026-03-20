@@ -1,38 +1,31 @@
+import { NavLink, Link } from "react-router-dom";
 import styles from "./Header.module.css";
-
-const navItems = [
-    {
-        id: 1,
-        label: "Список всех фильмов",
-        link: "/movies",
-    },
-    {
-        id: 2,
-        label: "Избранное",
-        link: "/favorites",
-    },
-] as const;
+import {appNavItems} from "../../../lib";
 
 export default function Header() {
 
     return (
         <header className={styles.header}>
             <div className={styles.inner}>
+                <Link to="/" className={styles.brand} aria-label="KinoPokaz — на главную">
+                    <span className={styles.logo} aria-hidden>
+                        KP
+                    </span>
 
-                <div className={styles.mainLogo}>
-                    <div className={styles.logo}>KP</div>
-                    <h1 className={styles.title}>KinoPokaz</h1>
-                </div>
+                    <span className={styles.brandText}>KinoPokaz</span>
+                </Link>
 
                 <nav className={styles.nav} aria-label="Основная навигация">
-                    {navItems.map((item) => (
-                        <a
+                    {appNavItems.map((item) => (
+                        <NavLink
                             key={item.id}
-                            className={styles.link}
-                            href={item.link}
+                            to={item.to}
+                            className={({ isActive }) =>
+                                `${styles.link} ${isActive ? styles.linkActive : ""}`.trim()
+                            }
                         >
                             {item.label}
-                        </a>
+                        </NavLink>
                     ))}
                 </nav>
 
