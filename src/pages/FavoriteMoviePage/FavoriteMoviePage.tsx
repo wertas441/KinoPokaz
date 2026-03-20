@@ -1,16 +1,35 @@
+import { useCallback } from "react";
 import { useUnit } from "effector-react";
 import MovieCard from "../../components/UI/movieCard/MovieCard.tsx";
+import ModalWindow from "../../components/UI/modalWindow/ModalWindow.tsx";
 import styles from "./FavoriteMoviePage.module.css";
 import { $favoriteMovies, resetFavorites } from "../../lib/store/favoriteMovieStore.ts";
 import useMovieGridClick from "../../lib/hooks/useMovieGridClick.ts";
+import {useModalWindow} from "../../lib/hooks/useModalWindow.ts";
 
 export default function FavoriteMoviePage() {
 
     const favoriteMovies = useUnit($favoriteMovies);
     const gridClickHandler = useMovieGridClick(favoriteMovies);
 
+    const { isModalWindowOpen, toggleModalWindow } = useModalWindow();
+
+    const confirmClearFavorites = useCallback(() => {
+        resetFavorites();
+
+        toggleModalWindow();
+    }, [toggleModalWindow]);
+
     return (
         <main className={styles.page}>
+            <ModalWindow
+                isOpen={isModalWindowOpen}
+                onClose={toggleModalWindow}
+                title="Очистить избранное?"
+                description="Вы уверены, что хотите полностью очистить список избранного?"
+                onConfirm={confirmClearFavorites}
+            />
+
             <section className={styles.container}>
                 <div className={styles.header}>
                     <div>
@@ -23,7 +42,7 @@ export default function FavoriteMoviePage() {
                         <button
                             type="button"
                             className={styles.resetButton}
-                            onClick={() => resetFavorites()}
+                            onClick={toggleModalWindow}
                         >
                             Очистить избранное
                         </button>
