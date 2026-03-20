@@ -11,6 +11,11 @@
     position: relative;
 }
 
+.linkText {
+    text-decoration: none;
+
+}
+
 .card:hover {
     transform: translateY(-4px);
     box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);

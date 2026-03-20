@@ -8,10 +8,20 @@ export interface Movie {
     genres: string[];
 }
 
-export interface MovieListDoc {
+export interface MovieDetails extends Movie {
+    description: string;
+    premiereWorld?: string;
+    premiereRussia?: string;
+}
+
+export interface MovieDocStructure {
     id: number;
-    name?: string;
-    year?: number;
+    name: string;
+    year: number;
+    description?: string;
+    genres: {
+        name: string
+    }[];
     rating?: {
         kp?: number;
         imdb?: number;
@@ -20,10 +30,14 @@ export interface MovieListDoc {
         url?: string;
         previewUrl?: string;
     };
+    premiere?: {
+        world?: string;
+        russia?: string
+    }
 }
 
 export interface MovieListResponse {
-    docs: MovieListDoc[];
+    docs: MovieDocStructure[];
     page: number;
     pages: number;
     total: number;
