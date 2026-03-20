@@ -30,9 +30,9 @@ function mapMoviesData(doc: MovieDocStructure): MovieDetails {
     };
 }
 
-export async function getMovieList(pageNumber: number, limitNumber: number): Promise<MovieListPage> {
+export async function getMovieList(pageNumber: number, limitNumber: number, options?: string[]): Promise<MovieListPage> {
 
-    const query = [
+    const queryParts = [
         `/movie?page=${pageNumber}`,
         `limit=${limitNumber}`,
         `selectFields=id`,
@@ -44,7 +44,17 @@ export async function getMovieList(pageNumber: number, limitNumber: number): Pro
         `notNullFields=poster.url`,
         `sortField=rating.kp`,
         `sortType=-1`,
-    ].join('&');
+    ];
+
+    for (const slug of options ?? []) {
+        const trimmed = slug.trim();
+
+        if (trimmed) {
+            queryParts.push(`genres.name=${encodeURIComponent(`+${trimmed}`)}`);
+        }
+    }
+
+    const query = queryParts.join("&");
 
     try {
         const { data } = await api.get<MovieListResponse>(query);

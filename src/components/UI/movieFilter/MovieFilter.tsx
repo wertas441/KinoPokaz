@@ -1,8 +1,7 @@
 import FilterInput from "../../inputs/FIlterInput/FilterInput.tsx";
 import styles from "./MovieFilter.module.css";
 import {useMovieFilter} from "../../../lib/hooks/useMovieFilter.ts";
-
-const genres = ["Фантастика", "Драма", "Приключения", "Триллер"] as const;
+import {MOVIE_GENRE_OPTIONS} from "../../../lib/movieGenres.ts";
 
 export default function MovieFilter() {
 
@@ -43,15 +42,15 @@ export default function MovieFilter() {
                 <span className={styles.label}>Жанры</span>
 
                 <div className={styles.checkboxList}>
-                    {genres.map((genre) => (
-                        <label key={genre} className={styles.checkbox}>
+                    {MOVIE_GENRE_OPTIONS.map(({ slug, label }) => (
+                        <label key={slug} className={styles.checkbox}>
                             <input
                                 type="checkbox"
-                                checked={genresFilter.includes(genre)}
-                                onChange={() => handleGenreChange(genre)}
+                                checked={genresFilter.includes(slug)}
+                                onChange={() => handleGenreChange(slug)}
                             />
 
-                            {genre}
+                            {label}
                         </label>
                     ))}
                 </div>

@@ -1,11 +1,20 @@
+import {useMemo} from "react";
 import {useSearchParams} from "react-router";
+import {type MovieGenreSlug, parseGenreParam} from "../movieGenres.ts";
 
 export function useMovieFilter() {
 
     const [searchParams, setSearchParams] = useSearchParams();
 
     const nameFilter = searchParams.get("name") || "";
-    const genresFilter = searchParams.getAll("genre");
+
+    const genresFilter = useMemo(() => {
+        return searchParams
+            .getAll("genre")
+            .map(parseGenreParam)
+            .filter((slug): slug is NonNullable<typeof slug> => Boolean(slug));
+    }, [searchParams]);
+
     const fromYearFilter = searchParams.get("from") || "";
     const toYearFilter = searchParams.get("to") || "";
     const fromRatingFilter = searchParams.get("fromRating") || "";
@@ -29,7 +38,7 @@ export function useMovieFilter() {
         setSearchParams(newParams);
     };
 
-    const handleGenreChange = (genre: string) => {
+    const handleGenreChange = (genre: MovieGenreSlug) => {
         const nextGenres = genresFilter.includes(genre)
             ? genresFilter.filter(g => g !== genre)
             : [...genresFilter, genre];

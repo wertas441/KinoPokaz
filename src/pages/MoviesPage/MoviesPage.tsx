@@ -42,6 +42,8 @@ export default function MoviesPage() {
         updateSearchParam,
     } = useMovieFilter();
 
+    const genreKey = useMemo(() => [...genresFilter].sort().join("|"), [genresFilter]);
+
     useLayoutEffect(() => {
         let cancelled = false;
 
@@ -49,7 +51,8 @@ export default function MoviesPage() {
             setIsLoading(true);
 
             try {
-                const { movies, pages, page, total } = await getMovieList(1, PAGE_SIZE);
+                const { movies, pages, page, total } = await getMovieList(1, PAGE_SIZE, genresFilter);
+
                 if (cancelled) return;
 
                 setMovies(movies);
@@ -66,7 +69,7 @@ export default function MoviesPage() {
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [genreKey, genresFilter]);
 
     const loadNextPage = useCallback(async () => {
         if (loadMoreLock.current || !hasMore || isLoading || isLoadingMore) return;
@@ -75,7 +78,7 @@ export default function MoviesPage() {
         setIsLoadingMore(true);
 
         try {
-            const { movies, pages, page, total } = await getMovieList(listPage + 1, PAGE_SIZE);
+            const { movies, pages, page, total } = await getMovieList(listPage + 1, PAGE_SIZE, genresFilter);
 
             setMovies((prev) => {
                 return [...prev, ...movies];
@@ -90,7 +93,7 @@ export default function MoviesPage() {
 
             setIsLoadingMore(false);
         }
-    }, [hasMore, isLoading, isLoadingMore, listPage]);
+    }, [hasMore, isLoading, isLoadingMore, listPage, genresFilter]);
 
     const gridClickHandler = useMovieGridClick(favoriteMovies, movies);
 
@@ -98,7 +101,9 @@ export default function MoviesPage() {
         return movies
             .filter((movie) => {
                 const matchesName = (movie.title ?? '').toLowerCase().includes(nameFilter.toLowerCase());
-                const matchesGenre = genresFilter.length === 0 || movie.genres?.some(g => genresFilter.includes(g));
+                const matchesGenre =
+                    genresFilter.length === 0 ||
+                    genresFilter.every((slug) => movie.genres?.some((g) => g.toLowerCase() === slug));
 
                 const matchesFromYear = fromYearFilter === "" || movie.year >= parseInt(fromYearFilter);
                 const matchesToYear = toYearFilter === "" || movie.year <= parseInt(toYearFilter);
