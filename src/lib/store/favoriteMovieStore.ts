@@ -1,21 +1,13 @@
 import { createEvent, createStore } from "effector";
-
-export interface FavoriteMovie {
-    id: number;
-    title: string;
-    year: number;
-    poster: string;
-    rating: number;
-    genres?: string[];
-}
+import type {Movie} from "../../types/movie.ts";
 
 const initialState = JSON.parse(localStorage.getItem("favorites") || "[]");
 
-export const addFavorite = createEvent<FavoriteMovie>();
+export const addFavorite = createEvent<Movie>();
 export const removeFavorite = createEvent<number>();
 export const resetFavorites = createEvent();
 
-export const $favoriteMovies = createStore<FavoriteMovie[]>(initialState)
+export const $favoriteMovies = createStore<Movie[]>(initialState)
     .on(addFavorite, (state, movie) => {
         const isExist = state.some((item) => item.id === movie.id);
 
@@ -34,6 +26,8 @@ $favoriteMovies.watch((state) => {
     localStorage.setItem("favorites", JSON.stringify(state));
 });
 
-export const isFavoriteCheck = (id: number, favorites: FavoriteMovie[]) => {
-    return favorites.some(movie => movie.id === id)
+export const isFavoriteCheck = (id: number) => {
+    const data = $favoriteMovies.getState();
+
+    return data.some(movie => movie.id === id)
 }

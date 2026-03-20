@@ -5,6 +5,7 @@ export interface Movie {
     year: number;
     rating: number;
     poster: string;
+    movieLength: number;
     genres: string[];
 }
 
@@ -19,6 +20,7 @@ export interface MovieDocStructure {
     name: string;
     year: number;
     description?: string;
+    movieLength?: number,
     genres: {
         name: string
     }[];

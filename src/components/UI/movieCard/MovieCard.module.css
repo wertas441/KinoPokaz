@@ -13,7 +13,7 @@
 
 .linkText {
     text-decoration: none;
-
+    color: var(--text-primary);
 }
 
 .card:hover {

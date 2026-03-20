@@ -3,11 +3,10 @@ import MovieCard from "../../components/UI/movieCard/MovieCard.tsx";
 import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
 import { useUnit } from "effector-react";
 import {
-    $favoriteMovies,
     addFavorite,
-    isFavoriteCheck,
+    $favoriteMovies,
 } from "../../lib/store/favoriteMovieStore.ts";
-import { $compareMovies, isInCompareCheck } from "../../lib/store/compareMovieStore.ts";
+import { $compareMovies } from "../../lib/store/compareMovieStore.ts";
 import {useMovieFilter} from "../../lib/hooks/useMovieFilter.ts";
 import useMovieGridClick from "../../lib/hooks/useMovieGridClick.ts";
 import { useModalWindow } from "../../lib/hooks/useModalWindow.ts";
@@ -32,8 +31,6 @@ export default function MoviesPage() {
     const loadMoreLock = useRef(false);
     const sentinelRef = useRef<HTMLDivElement>(null);
 
-    const favoriteMovies = useUnit($favoriteMovies);
-    const compareMovies = useUnit($compareMovies);
     const [pendingFavoriteMovie, setPendingFavoriteMovie] = useState<Movie | null>(null);
     const { isModalWindowOpen, toggleModalWindow } = useModalWindow();
 
@@ -123,13 +120,16 @@ export default function MoviesPage() {
             poster: pendingFavoriteMovie.poster,
             rating: pendingFavoriteMovie.rating,
             genres: pendingFavoriteMovie.genres,
+            movieLength: pendingFavoriteMovie.movieLength,
         });
+
         closeFavoriteModal();
     }, [pendingFavoriteMovie, closeFavoriteModal]);
 
-    const gridClickHandler = useMovieGridClick(favoriteMovies, movies, {
-        onRequestAddFavorite: handleRequestAddFavorite,
-    });
+    const gridClickHandler = useMovieGridClick(movies, handleRequestAddFavorite);
+
+    const favoriteMovies = useUnit($favoriteMovies);
+    const compareMovies = useUnit($compareMovies);
 
     const filteredMovies = useMemo(() => {
         return movies
@@ -252,8 +252,8 @@ export default function MoviesPage() {
                                     <MovieCard
                                         key={movie.id}
                                         {...movie}
-                                        isFavorite={isFavoriteCheck(movie.id, favoriteMovies)}
-                                        isInCompare={isInCompareCheck(movie.id, compareMovies)}
+                                        isFavorite={favoriteMovies.some((m) => m.id === movie.id)}
+                                        isInCompare={compareMovies.some((m) => m.id === movie.id)}
                                     />
                                 ))}
                             </div>

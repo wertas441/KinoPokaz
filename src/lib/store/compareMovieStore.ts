@@ -7,6 +7,7 @@ export interface CompareMovie {
     year: number;
     rating: number;
     genres: string[];
+    movieLength: number;
 }
 
 function loadInitial(): CompareMovie[] {
@@ -14,7 +15,7 @@ function loadInitial(): CompareMovie[] {
         const raw = localStorage.getItem('compareMovies');
         if (!raw) return [];
 
-        const parsed = JSON.parse(raw) as unknown;
+        const parsed = JSON.parse(raw);
         if (!Array.isArray(parsed)) return [];
 
         return parsed.filter(
@@ -61,7 +62,11 @@ $compareMovies.watch((state) => {
     localStorage.setItem('compareMovies', JSON.stringify(state));
 });
 
-export const isInCompareCheck = (id: number, list: CompareMovie[]) => list.some((m) => m.id === id);
+export const isInCompareCheck = (id: number) => {
+    const data = $compareMovies.getState();
+
+    return data.find((movie) => movie.id === id);
+}
 
 export function movieToCompareMovie(movie: Movie): CompareMovie {
 
@@ -71,5 +76,6 @@ export function movieToCompareMovie(movie: Movie): CompareMovie {
         year: movie.year,
         rating: movie.rating,
         genres: movie.genres ?? [],
+        movieLength: movie.movieLength,
     };
 }

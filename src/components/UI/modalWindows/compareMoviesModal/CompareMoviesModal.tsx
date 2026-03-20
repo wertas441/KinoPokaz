@@ -6,59 +6,14 @@ import {
     $comparePanelOpen,
     closeComparePanel,
     clearCompare,
-    type CompareMovie,
 } from "../../../../lib/store/compareMovieStore.ts";
 import styles from "./CompareMoviesModal.module.css";
-
-function formatGenres(genres: string[]): string {
-    if (!genres.length) return "—";
-
-    return genres.join(", ");
-}
-
-function Column({ movie }: { movie: CompareMovie | null }) {
-    if (!movie) {
-        return (
-            <div className={styles.column}>
-                <div className={styles.placeholder}>Добавьте фильм из каталога или избранного</div>
-            </div>
-        );
-    }
-
-    return (
-        <div className={styles.column}>
-            <dl className={styles.rows}>
-                <div className={styles.row}>
-                    <dt>Название</dt>
-
-                    <dd>{movie.title}</dd>
-                </div>
-
-                <div className={styles.row}>
-                    <dt>Год</dt>
-
-                    <dd>{movie.year > 0 ? movie.year : "—"}</dd>
-                </div>
-
-                <div className={styles.row}>
-                    <dt>Рейтинг</dt>
-
-                    <dd>{Number.isFinite(movie.rating) ? movie.rating.toFixed(1) : "—"}</dd>
-                </div>
-
-                <div className={styles.row}>
-                    <dt>Жанры</dt>
-
-                    <dd>{formatGenres(movie.genres)}</dd>
-                </div>
-            </dl>
-        </div>
-    );
-}
+import CompareColumn from "../../../elements/compareColumn/CompareColumn.tsx";
 
 export default function CompareMoviesModal() {
 
     const [movies, isOpen] = useUnit([$compareMovies, $comparePanelOpen]);
+
     const panelRef = useRef<HTMLDivElement>(null);
 
     const first = movies[0] ?? null;
@@ -81,6 +36,7 @@ export default function CompareMoviesModal() {
 
         return () => {
             document.removeEventListener("keydown", handleKeyDown);
+
             document.body.style.overflow = prev;
         };
     }, [isOpen, handleKeyDown]);
@@ -118,7 +74,11 @@ export default function CompareMoviesModal() {
 
                     <div className={styles.headActions}>
                         {movies.length > 0 && (
-                            <button type="button" className={styles.textButton} onClick={() => clearCompare()}>
+                            <button
+                                type="button"
+                                className={styles.textButton}
+                                onClick={() => clearCompare()}
+                            >
                                 Очистить
                             </button>
                         )}
@@ -135,9 +95,9 @@ export default function CompareMoviesModal() {
                 </div>
 
                 <div className={styles.grid}>
-                    <Column movie={first} />
+                    <CompareColumn movie={first} />
 
-                    <Column movie={second} />
+                    <CompareColumn movie={second} />
                 </div>
             </div>
         </div>

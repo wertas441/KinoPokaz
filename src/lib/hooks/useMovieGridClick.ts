@@ -1,13 +1,9 @@
-import {addFavorite, type FavoriteMovie, isFavoriteCheck, removeFavorite} from "../store/favoriteMovieStore.ts";
+import {addFavorite, isFavoriteCheck, removeFavorite} from "../store/favoriteMovieStore.ts";
 import { addToCompare, movieToCompareMovie } from "../store/compareMovieStore.ts";
 import { type MouseEvent } from "react";
 import type { Movie } from "../../types/movie.ts";
 
-export interface MovieGridClickOptions {
-    onRequestAddFavorite?: (movie: Movie) => void;
-}
-
-export default function useMovieGridClick(favoriteMovies: FavoriteMovie[], movies?: Movie[], options?: MovieGridClickOptions) {
+export default function useMovieGridClick(movies: Movie[], handleRequestAddFavorite?: (movie: Movie) => void) {
 
     return (event: MouseEvent<HTMLDivElement>) => {
         const target = event.target as HTMLElement;
@@ -18,7 +14,6 @@ export default function useMovieGridClick(favoriteMovies: FavoriteMovie[], movie
             const movieCard = compareButton.closest<HTMLElement>("[data-movie-id]");
             const movieId = Number(movieCard?.dataset.movieId);
 
-            if (!movies || !Number.isFinite(movieId)) return;
             const movie = movies.find((item) => item.id === movieId);
 
             if (!movie) return;
@@ -32,18 +27,17 @@ export default function useMovieGridClick(favoriteMovies: FavoriteMovie[], movie
 
         const movieId = Number(movieCard?.dataset.movieId);
 
-        if (isFavoriteCheck(movieId, favoriteMovies)) {
+        if (isFavoriteCheck(movieId)) {
             removeFavorite(movieId);
 
             return;
         }
 
-        if (!movies) return;
         const movie = movies.find((item) => item.id === movieId);
         if (!movie) return;
 
-        if (options?.onRequestAddFavorite) {
-            options.onRequestAddFavorite(movie);
+        if (handleRequestAddFavorite) {
+            handleRequestAddFavorite(movie);
 
             return;
         }
@@ -55,6 +49,7 @@ export default function useMovieGridClick(favoriteMovies: FavoriteMovie[], movie
             poster: movie.poster,
             rating: movie.rating,
             genres: movie.genres,
+            movieLength: movie.movieLength,
         });
     }
 }

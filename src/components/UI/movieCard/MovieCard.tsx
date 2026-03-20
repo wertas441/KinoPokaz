@@ -9,20 +9,11 @@ interface IProps {
     rating: number;
     poster: string;
     isFavorite: boolean;
-    /** Нужны для сравнения при клике по сетке */
     genres?: string[];
     isInCompare?: boolean;
 }
 
-export default function MovieCard({
-    id,
-    poster,
-    title,
-    year,
-    rating,
-    isFavorite,
-    isInCompare = false,
-}: IProps) {
+export default function MovieCard({id, poster, title, year, rating, isFavorite, isInCompare = false}: IProps) {
 
     const [isPosterBroken, setIsPosterBroken] = useState(false);
 
