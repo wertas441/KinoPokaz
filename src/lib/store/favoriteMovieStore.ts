@@ -6,6 +6,7 @@ export interface FavoriteMovie {
     year: number;
     poster: string;
     rating: number;
+    genres?: string[];
 }
 
 const initialState = JSON.parse(localStorage.getItem("favorites") || "[]");

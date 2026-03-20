@@ -9,9 +9,20 @@ interface IProps {
     rating: number;
     poster: string;
     isFavorite: boolean;
+    /** Нужны для сравнения при клике по сетке */
+    genres?: string[];
+    isInCompare?: boolean;
 }
 
-export default function MovieCard({id, poster, title, year, rating, isFavorite}: IProps) {
+export default function MovieCard({
+    id,
+    poster,
+    title,
+    year,
+    rating,
+    isFavorite,
+    isInCompare = false,
+}: IProps) {
 
     const [isPosterBroken, setIsPosterBroken] = useState(false);
 
@@ -64,8 +75,16 @@ export default function MovieCard({id, poster, title, year, rating, isFavorite}:
                         {isFavorite ? "В избранном" : "В избранное"}
                     </button>
 
-                    <button className={styles.actionButton} type="button" aria-label={`Сравнить "${title}"`}>
-                        Сравнить
+                    <button
+                        className={`${styles.actionButton} ${isInCompare ? styles.actionButtonCompareActive : ""}`}
+                        type="button"
+                        data-action="compare"
+                        aria-pressed={isInCompare}
+                        aria-label={
+                            isInCompare ? `Убрать «${title}» из сравнения` : `Добавить «${title}» в сравнение`
+                        }
+                    >
+                        {isInCompare ? "В сравнении" : "Сравнить"}
                     </button>
                 </div>
             </div>

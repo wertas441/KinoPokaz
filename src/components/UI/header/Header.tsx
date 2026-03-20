@@ -1,8 +1,12 @@
 import { NavLink, Link } from "react-router-dom";
+import { useUnit } from "effector-react";
 import styles from "./Header.module.css";
-import {appNavItems} from "../../../lib";
+import { appNavItems } from "../../../lib";
+import { $compareMovies, openComparePanel } from "../../../lib/store/compareMovieStore.ts";
 
 export default function Header() {
+    const compareMovies = useUnit($compareMovies);
+    const compareCount = compareMovies.length;
 
     return (
         <header className={styles.header}>
@@ -30,8 +34,18 @@ export default function Header() {
                 </nav>
 
                 <div className={styles.actions}>
-                    <button className={styles.compare} type="button">
+                    <button
+                        className={styles.compare}
+                        type="button"
+                        onClick={() => openComparePanel()}
+                        aria-label={
+                            compareCount > 0
+                                ? `Открыть сравнение, выбрано фильмов: ${compareCount}`
+                                : "Открыть сравнение фильмов"
+                        }
+                    >
                         Сравнение
+                        {compareCount > 0 ? <span className={styles.compareBadge}>{compareCount}</span> : null}
                     </button>
                 </div>
             </div>

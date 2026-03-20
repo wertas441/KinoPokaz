@@ -7,10 +7,11 @@ import {
     addFavorite,
     isFavoriteCheck,
 } from "../../lib/store/favoriteMovieStore.ts";
+import { $compareMovies, isInCompareCheck } from "../../lib/store/compareMovieStore.ts";
 import {useMovieFilter} from "../../lib/hooks/useMovieFilter.ts";
 import useMovieGridClick from "../../lib/hooks/useMovieGridClick.ts";
 import { useModalWindow } from "../../lib/hooks/useModalWindow.ts";
-import ModalWindow from "../../components/UI/modalWindow/ModalWindow.tsx";
+import ModalWindow from "../../components/UI/modalWindows/modalWindow/ModalWindow.tsx";
 import MovieFilter from "../../components/UI/movieFilter/MovieFilter.tsx";
 import {getMovieList} from "../../lib/controllers/movie.ts";
 import type {Movie} from "../../types/movie.ts";
@@ -32,6 +33,7 @@ export default function MoviesPage() {
     const sentinelRef = useRef<HTMLDivElement>(null);
 
     const favoriteMovies = useUnit($favoriteMovies);
+    const compareMovies = useUnit($compareMovies);
     const [pendingFavoriteMovie, setPendingFavoriteMovie] = useState<Movie | null>(null);
     const { isModalWindowOpen, toggleModalWindow } = useModalWindow();
 
@@ -120,6 +122,7 @@ export default function MoviesPage() {
             year: pendingFavoriteMovie.year,
             poster: pendingFavoriteMovie.poster,
             rating: pendingFavoriteMovie.rating,
+            genres: pendingFavoriteMovie.genres,
         });
         closeFavoriteModal();
     }, [pendingFavoriteMovie, closeFavoriteModal]);
@@ -250,6 +253,7 @@ export default function MoviesPage() {
                                         key={movie.id}
                                         {...movie}
                                         isFavorite={isFavoriteCheck(movie.id, favoriteMovies)}
+                                        isInCompare={isInCompareCheck(movie.id, compareMovies)}
                                     />
                                 ))}
                             </div>

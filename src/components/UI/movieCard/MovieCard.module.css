@@ -139,6 +139,12 @@
     background: rgba(0, 119, 255, 0.28);
 }
 
+.actionButtonCompareActive {
+    border-color: rgba(56, 189, 248, 0.75);
+    color: var(--white);
+    background: rgba(56, 189, 248, 0.18);
+}
+
 @media (max-width: 640px) {
     .cardBody {
         align-items: stretch;

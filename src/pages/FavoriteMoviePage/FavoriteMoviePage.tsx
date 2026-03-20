@@ -1,16 +1,32 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useUnit } from "effector-react";
 import MovieCard from "../../components/UI/movieCard/MovieCard.tsx";
-import ModalWindow from "../../components/UI/modalWindow/ModalWindow.tsx";
+import ModalWindow from "../../components/UI/modalWindows/modalWindow/ModalWindow.tsx";
 import styles from "./FavoriteMoviePage.module.css";
 import { $favoriteMovies, resetFavorites } from "../../lib/store/favoriteMovieStore.ts";
+import { $compareMovies, isInCompareCheck } from "../../lib/store/compareMovieStore.ts";
 import useMovieGridClick from "../../lib/hooks/useMovieGridClick.ts";
-import {useModalWindow} from "../../lib/hooks/useModalWindow.ts";
+import { useModalWindow } from "../../lib/hooks/useModalWindow.ts";
+import type { Movie } from "../../types/movie.ts";
 
 export default function FavoriteMoviePage() {
 
     const favoriteMovies = useUnit($favoriteMovies);
-    const gridClickHandler = useMovieGridClick(favoriteMovies);
+    const compareMovies = useUnit($compareMovies);
+
+    const moviesForGrid = useMemo<Movie[]>(() => {
+
+        return favoriteMovies.map((m) => ({
+            id: m.id,
+            title: m.title,
+            year: m.year,
+            rating: m.rating,
+            poster: m.poster,
+            genres: m.genres ?? [],
+        }))
+    }, [favoriteMovies]);
+
+    const gridClickHandler = useMovieGridClick(favoriteMovies, moviesForGrid);
 
     const { isModalWindowOpen, toggleModalWindow } = useModalWindow();
 
@@ -57,8 +73,10 @@ export default function FavoriteMoviePage() {
                         {favoriteMovies.map((movie) => (
                             <MovieCard
                                 key={movie.id}
+                                genres={movie.genres ?? []}
                                 {...movie}
                                 isFavorite
+                                isInCompare={isInCompareCheck(movie.id, compareMovies)}
                             />
                         ))}
                     </div>
