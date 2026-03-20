@@ -2,7 +2,16 @@ import {addFavorite, type FavoriteMovie, isFavoriteCheck, removeFavorite} from "
 import {type MouseEvent} from "react";
 import type {Movie} from "../../types/movie.ts";
 
-export default function useMovieGridClick(favoriteMovies: FavoriteMovie[], movies?: Movie[]) {
+export interface MovieGridClickOptions {
+    /** Вместо немедленного добавления в избранное — например, открыть модальное подтверждение */
+    onRequestAddFavorite?: (movie: Movie) => void;
+}
+
+export default function useMovieGridClick(
+    favoriteMovies: FavoriteMovie[],
+    movies?: Movie[],
+    options?: MovieGridClickOptions,
+) {
 
     return (event: MouseEvent<HTMLDivElement>) => {
         const target = event.target as HTMLElement;
@@ -19,6 +28,11 @@ export default function useMovieGridClick(favoriteMovies: FavoriteMovie[], movie
         if (!movies) return;
         const movie = movies.find((item) => item.id === movieId);
         if (!movie) return;
+
+        if (options?.onRequestAddFavorite) {
+            options.onRequestAddFavorite(movie);
+            return;
+        }
 
         addFavorite({
             id: movie.id,

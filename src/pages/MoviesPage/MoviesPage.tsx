@@ -4,10 +4,13 @@ import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from
 import { useUnit } from "effector-react";
 import {
     $favoriteMovies,
+    addFavorite,
     isFavoriteCheck,
 } from "../../lib/store/favoriteMovieStore.ts";
 import {useMovieFilter} from "../../lib/hooks/useMovieFilter.ts";
 import useMovieGridClick from "../../lib/hooks/useMovieGridClick.ts";
+import { useModalWindow } from "../../lib/hooks/useModalWindow.ts";
+import ModalWindow from "../../components/UI/ModalWindow/ModalWindow.tsx";
 import MovieFilter from "../../components/UI/movieFilter/MovieFilter.tsx";
 import {getMovieList} from "../../lib/controllers/movie.ts";
 import type {Movie} from "../../types/movie.ts";
@@ -25,11 +28,12 @@ export default function MoviesPage() {
 
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
-
     const loadMoreLock = useRef(false);
     const sentinelRef = useRef<HTMLDivElement>(null);
 
     const favoriteMovies = useUnit($favoriteMovies);
+    const [pendingFavoriteMovie, setPendingFavoriteMovie] = useState<Movie | null>(null);
+    const { isModalWindowOpen, toggleModalWindow } = useModalWindow();
 
     const {
         nameFilter,
@@ -95,7 +99,34 @@ export default function MoviesPage() {
         }
     }, [hasMore, isLoading, isLoadingMore, listPage, genresFilter]);
 
-    const gridClickHandler = useMovieGridClick(favoriteMovies, movies);
+    const handleRequestAddFavorite = useCallback((movie: Movie) => {
+        setPendingFavoriteMovie(movie);
+
+        toggleModalWindow();
+    }, [toggleModalWindow]);
+
+    const closeFavoriteModal = useCallback(() => {
+        toggleModalWindow();
+
+        setPendingFavoriteMovie(null);
+    }, [toggleModalWindow]);
+
+    const confirmAddFavorite = useCallback(() => {
+        if (!pendingFavoriteMovie) return;
+
+        addFavorite({
+            id: pendingFavoriteMovie.id,
+            title: pendingFavoriteMovie.title,
+            year: pendingFavoriteMovie.year,
+            poster: pendingFavoriteMovie.poster,
+            rating: pendingFavoriteMovie.rating,
+        });
+        closeFavoriteModal();
+    }, [pendingFavoriteMovie, closeFavoriteModal]);
+
+    const gridClickHandler = useMovieGridClick(favoriteMovies, movies, {
+        onRequestAddFavorite: handleRequestAddFavorite,
+    });
 
     const filteredMovies = useMemo(() => {
         return movies
@@ -145,6 +176,18 @@ export default function MoviesPage() {
 
     return (
         <main className={styles.page}>
+            <ModalWindow
+                isOpen={isModalWindowOpen}
+                onClose={closeFavoriteModal}
+                title="Добавить в избранное?"
+                description={
+                    pendingFavoriteMovie
+                        ? `Вы уверены, что хотите добавить «${pendingFavoriteMovie.title}» (${pendingFavoriteMovie.year}) в избранное?`
+                        : ""
+                }
+                onConfirm={confirmAddFavorite}
+            />
+
             <div className={styles.container}>
 
                 <MovieFilter />
