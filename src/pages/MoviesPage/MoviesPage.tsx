@@ -48,6 +48,10 @@ export default function MoviesPage() {
     const genreKey = useMemo(() => [...genresFilter].sort().join("|"), [genresFilter]);
 
     useLayoutEffect(() => {
+        document.title = "Каталог фильмов | KinoPokaz";
+    }, []);
+
+    useLayoutEffect(() => {
         let cancelled = false;
 
         const getData = async () => {

@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import {useCallback, useLayoutEffect} from "react";
 import { useUnit } from "effector-react";
 import MovieCard from "../../components/UI/movieCard/MovieCard.tsx";
 import ModalWindow from "../../components/UI/modalWindows/modalWindow/ModalWindow.tsx";
@@ -12,6 +12,10 @@ export default function FavoriteMoviePage() {
 
     const movies = useUnit($favoriteMovies);
     const compareMovies = useUnit($compareMovies);
+
+    useLayoutEffect(() => {
+        document.title = "Избранные фильмы | KinoPokaz";
+    }, []);
 
     const gridClickHandler = useMovieGridClick(movies);
 
