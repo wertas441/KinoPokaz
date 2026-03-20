@@ -11,6 +11,11 @@
     position: relative;
 }
 
+.linkText {
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
 .card:hover {
     transform: translateY(-4px);
     box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
@@ -132,6 +137,12 @@
     border-color: rgba(0, 119, 255, 0.85);
     color: var(--white);
     background: rgba(0, 119, 255, 0.28);
+}
+
+.actionButtonCompareActive {
+    border-color: rgba(56, 189, 248, 0.75);
+    color: var(--white);
+    background: rgba(56, 189, 248, 0.18);
 }
 
 @media (max-width: 640px) {

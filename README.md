@@ -1,73 +1,112 @@
-# React + TypeScript + Vite
+# KinoPokaz
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Веб-приложение для просмотра каталога фильмов: поиск и фильтрация, карточки с постерами и рейтингами, страница фильма, избранное и сравнение двух картин. Данные приходят с внешнего API.
 
-Currently, two official plugins are available:
+## Технологии
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Слой          | Стек                               |
+|---------------|------------------------------------|
+| UI            | **React 19**, **TypeScript**       |
+| Сборка        | **Vite 8**                         |
+| Маршрутизация | **React Router 7**                 |
+| Состояние     | **Effector**, **effector-react**   |
+| HTTP          | **Axios**                          |
+| Линтинг       | **ESLint 9**, **TypeScript ESLint** |
 
-## React Compiler
+## Возможности
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Главная** (`/`) — заглушка под будущий контент.
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Каталог** (`/movies`) — список фильмов с API, подгрузка следующих страниц при прокрутке, фильтр по жанрам на стороне API; на клиенте — поиск по названию, год и рейтинг, сортировка (рейтинг / год / название). Параметры фильтров отражаются в query-строке URL.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- **Карточка фильма** — переход на `/movies/:id`: описание, жанры, рейтинг, длительность, даты мировой премьеры и премьеры в России.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- **Избранное** (`/favorites`) — список сохранённых фильмов, очистка списка с подтверждением; данные хранятся в `localStorage`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **Сравнение** — до двух фильмов в панели сравнения; состояние сохраняется в `localStorage`.
+
+
+- Добавление в избранное из каталога с модальным подтверждением.
+
+## Запуск локально
+
+Требования: **Node.js** (рекомендуется актуальная LTS) и **Yarn** (в `package.json` указан `packageManager: yarn@1`) или **npm** / **pnpm** по аналогии.
+
+1) Клонировать репозиторий и перейти в каталог проекта.
+
+
+2) Установить зависимости:
+
+
+   **Yarn**
+
+   ```bash
+   yarn install
+   ```
+
+   **npm**
+
+   ```bash
+   npm install
+   ```
+
+3) Настроить переменные окружения. В корне есть файл `.env.default` с примером. Скопируйте его в `.env` и при необходимости подставьте свой ключ API:
+
+
+   ```bash
+   copy .env.default .env
+   ```
+
+   В `.env` должна быть строка вида `VITE_API_KEY=...`. У бесплатного тарифа API действует лимит запросов (в комментариях к `.env.default` указано про дневной лимит); при исчерпании лимита запросы могут перестать проходить — тогда нужен другой ключ.
+
+
+4. Запустить dev-сервер:
+
+
+   **Yarn**
+
+   ```bash
+   yarn dev
+   ```
+
+   **npm**
+
+   ```bash
+   npm run dev
+   ```
+
+   Приложение откроется по адресу, который покажет Vite (обычно `http://localhost:5173`).
+
+## Скрипты
+
+| Команда        | Назначение                                      |
+|----------------|-------------------------------------------------|
+| `yarn dev`     | Режим разработки (HMR)                          |
+| `yarn build`   | Сборка: `tsc -b` и `vite build`                 |
+| `yarn preview` | Локальный просмотр production-сборки              |
+| `yarn lint`    | Проверка ESLint                                 |
+
+Для npm замените префикс на `npm run` (например, `npm run dev`, `npm run build`).
+
+## Структура (кратко)
+
+- `src/app/` — точка входа (`main.tsx`), маршруты (`App.tsx`).
+
+
+- `src/pages/` — страницы: главная, каталог, детали фильма, избранное.
+
+
+- `src/components/` — UI: шапка, футер, карточка фильма, фильтры, модальные окна, сравнение.
+
+
+- `src/lib/` — Axios-клиент и навигация (`index.ts`), контроллеры API (`controllers/movie.ts`), сторы Effector, хуки.
+
+
+- `src/types/movie.ts` — типы данных фильма.
+
+
+

@@ -1,13 +1,16 @@
 import styles from "./MoviesPage.module.css";
-import MovieCard from "../../components/UI/MovieCard/MovieCard.tsx";
+import MovieCard from "../../components/UI/movieCard/MovieCard.tsx";
 import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
 import { useUnit } from "effector-react";
 import {
+    addFavorite,
     $favoriteMovies,
-    isFavoriteCheck,
 } from "../../lib/store/favoriteMovieStore.ts";
+import { $compareMovies } from "../../lib/store/compareMovieStore.ts";
 import {useMovieFilter} from "../../lib/hooks/useMovieFilter.ts";
 import useMovieGridClick from "../../lib/hooks/useMovieGridClick.ts";
+import { useModalWindow } from "../../lib/hooks/useModalWindow.ts";
+import ModalWindow from "../../components/UI/modalWindows/modalWindow/ModalWindow.tsx";
 import MovieFilter from "../../components/UI/movieFilter/MovieFilter.tsx";
 import {getMovieList} from "../../lib/controllers/movie.ts";
 import type {Movie} from "../../types/movie.ts";
@@ -25,11 +28,11 @@ export default function MoviesPage() {
 
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
-
     const loadMoreLock = useRef(false);
     const sentinelRef = useRef<HTMLDivElement>(null);
 
-    const favoriteMovies = useUnit($favoriteMovies);
+    const [pendingFavoriteMovie, setPendingFavoriteMovie] = useState<Movie | null>(null);
+    const { isModalWindowOpen, toggleModalWindow } = useModalWindow();
 
     const {
         nameFilter,
@@ -42,6 +45,12 @@ export default function MoviesPage() {
         updateSearchParam,
     } = useMovieFilter();
 
+    const genreKey = useMemo(() => [...genresFilter].sort().join("|"), [genresFilter]);
+
+    useLayoutEffect(() => {
+        document.title = "Каталог фильмов | KinoPokaz";
+    }, []);
+
     useLayoutEffect(() => {
         let cancelled = false;
 
@@ -49,7 +58,8 @@ export default function MoviesPage() {
             setIsLoading(true);
 
             try {
-                const { movies, pages, page, total } = await getMovieList(1, PAGE_SIZE);
+                const { movies, pages, page, total } = await getMovieList(1, PAGE_SIZE, genresFilter);
+
                 if (cancelled) return;
 
                 setMovies(movies);
@@ -66,7 +76,7 @@ export default function MoviesPage() {
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [genreKey, genresFilter]);
 
     const loadNextPage = useCallback(async () => {
         if (loadMoreLock.current || !hasMore || isLoading || isLoadingMore) return;
@@ -75,7 +85,7 @@ export default function MoviesPage() {
         setIsLoadingMore(true);
 
         try {
-            const { movies, pages, page, total } = await getMovieList(listPage + 1, PAGE_SIZE);
+            const { movies, pages, page, total } = await getMovieList(listPage + 1, PAGE_SIZE, genresFilter);
 
             setMovies((prev) => {
                 return [...prev, ...movies];
@@ -90,15 +100,48 @@ export default function MoviesPage() {
 
             setIsLoadingMore(false);
         }
-    }, [hasMore, isLoading, isLoadingMore, listPage]);
+    }, [hasMore, isLoading, isLoadingMore, listPage, genresFilter]);
 
-    const gridClickHandler = useMovieGridClick(favoriteMovies, movies);
+    const handleRequestAddFavorite = useCallback((movie: Movie) => {
+        setPendingFavoriteMovie(movie);
+
+        toggleModalWindow();
+    }, [toggleModalWindow]);
+
+    const closeFavoriteModal = useCallback(() => {
+        toggleModalWindow();
+
+        setPendingFavoriteMovie(null);
+    }, [toggleModalWindow]);
+
+    const confirmAddFavorite = useCallback(() => {
+        if (!pendingFavoriteMovie) return;
+
+        addFavorite({
+            id: pendingFavoriteMovie.id,
+            title: pendingFavoriteMovie.title,
+            year: pendingFavoriteMovie.year,
+            poster: pendingFavoriteMovie.poster,
+            rating: pendingFavoriteMovie.rating,
+            genres: pendingFavoriteMovie.genres,
+            movieLength: pendingFavoriteMovie.movieLength,
+        });
+
+        closeFavoriteModal();
+    }, [pendingFavoriteMovie, closeFavoriteModal]);
+
+    const gridClickHandler = useMovieGridClick(movies, handleRequestAddFavorite);
+
+    const favoriteMovies = useUnit($favoriteMovies);
+    const compareMovies = useUnit($compareMovies);
 
     const filteredMovies = useMemo(() => {
         return movies
             .filter((movie) => {
                 const matchesName = (movie.title ?? '').toLowerCase().includes(nameFilter.toLowerCase());
-                const matchesGenre = genresFilter.length === 0 || movie.genres?.some(g => genresFilter.includes(g));
+                const matchesGenre =
+                    genresFilter.length === 0 ||
+                    genresFilter.every((slug) => movie.genres?.some((g) => g.toLowerCase() === slug));
 
                 const matchesFromYear = fromYearFilter === "" || movie.year >= parseInt(fromYearFilter);
                 const matchesToYear = toYearFilter === "" || movie.year <= parseInt(toYearFilter);
@@ -140,6 +183,18 @@ export default function MoviesPage() {
 
     return (
         <main className={styles.page}>
+            <ModalWindow
+                isOpen={isModalWindowOpen}
+                onClose={closeFavoriteModal}
+                title="Добавить в избранное?"
+                description={
+                    pendingFavoriteMovie
+                        ? `Вы уверены, что хотите добавить «${pendingFavoriteMovie.title}» (${pendingFavoriteMovie.year}) в избранное?`
+                        : ""
+                }
+                onConfirm={confirmAddFavorite}
+            />
+
             <div className={styles.container}>
 
                 <MovieFilter />
@@ -201,7 +256,8 @@ export default function MoviesPage() {
                                     <MovieCard
                                         key={movie.id}
                                         {...movie}
-                                        isFavorite={isFavoriteCheck(movie.id, favoriteMovies)}
+                                        isFavorite={favoriteMovies.some((m) => m.id === movie.id)}
+                                        isInCompare={compareMovies.some((m) => m.id === movie.id)}
                                     />
                                 ))}
                             </div>

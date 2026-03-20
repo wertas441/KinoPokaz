@@ -1,44 +1,51 @@
+import { NavLink, Link } from "react-router-dom";
+import { useUnit } from "effector-react";
 import styles from "./Header.module.css";
-
-const navItems = [
-    {
-        id: 1,
-        label: "Список всех фильмов",
-        link: "/movies",
-    },
-    {
-        id: 2,
-        label: "Избранное",
-        link: "/favorites",
-    },
-] as const;
+import { appNavItems } from "../../../lib";
+import { $compareMovies, openComparePanel } from "../../../lib/store/compareMovieStore.ts";
 
 export default function Header() {
+    const compareMovies = useUnit($compareMovies);
+    const compareCount = compareMovies.length;
 
     return (
         <header className={styles.header}>
             <div className={styles.inner}>
+                <Link to="/" className={styles.brand} aria-label="KinoPokaz — на главную">
+                    <span className={styles.logo} aria-hidden>
+                        KP
+                    </span>
 
-                <div className={styles.mainLogo}>
-                    <div className={styles.logo}>KP</div>
-                    <h1 className={styles.title}>KinoPokaz</h1>
-                </div>
+                    <span className={styles.brandText}>KinoPokaz</span>
+                </Link>
 
                 <nav className={styles.nav} aria-label="Основная навигация">
-                    {navItems.map((item) => (
-                        <a
+                    {appNavItems.map((item) => (
+                        <NavLink
                             key={item.id}
-                            className={styles.link}
-                            href={item.link}
+                            to={item.to}
+                            className={({ isActive }) =>
+                                `${styles.link} ${isActive ? styles.linkActive : ""}`.trim()
+                            }
                         >
                             {item.label}
-                        </a>
+                        </NavLink>
                     ))}
                 </nav>
 
                 <div className={styles.actions}>
-                    <button className={styles.compare} type="button">
+                    <button
+                        className={styles.compare}
+                        type="button"
+                        onClick={() => openComparePanel()}
+                        aria-label={
+                            compareCount > 0
+                                ? `Открыть сравнение, выбрано фильмов: ${compareCount}`
+                                : "Открыть сравнение фильмов"
+                        }
+                    >
                         Сравнение
+                        {compareCount > 0 ? <span className={styles.compareBadge}>{compareCount}</span> : null}
                     </button>
                 </div>
             </div>

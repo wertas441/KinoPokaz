@@ -16,4 +16,24 @@ export const api = axios.create({
     },
 });
 
+export const appNavItems = [
+    { id: 1, label: "Главная", to: "/"},
+    { id: 2, label: "Каталог фильмов", to: "/movies"},
+    { id: 3, label: "Избранные фильмы", to: "/favorites"},
+] as const;
+
+export function formatPremiereDate(iso?: string): string | undefined {
+    if (!iso) return undefined;
+
+    try {
+        return new Intl.DateTimeFormat("ru-RU", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        }).format(new Date(iso));
+    } catch {
+        return undefined;
+    }
+}
+
 

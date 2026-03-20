@@ -1,39 +1,63 @@
 import {api, showErrorMessage} from "../index.ts";
-import type {Movie, MovieListDoc, MovieListPage, MovieListResponse} from "../../types/movie.ts";
+import type {
+    MovieDetails,
+    MovieDocStructure,
+    MovieListPage,
+    MovieListResponse
+} from "../../types/movie.ts";
 
-function mapListDocToMovie(doc: MovieListDoc): Movie {
+function mapMoviesData(doc: MovieDocStructure): MovieDetails {
+
     const kp = doc.rating?.kp ?? 0;
     const imdb = doc.rating?.imdb ?? 0;
-    let rating = kp > 0 ? kp : imdb;
-
-    if (!Number.isFinite(rating)) rating = 0;
+    const rating = kp > 0 ? kp : imdb;
 
     const poster = doc.poster?.url ?? doc.poster?.previewUrl ?? '';
 
+    const genres = (doc.genres ?? [])
+        .map((g) => g.name.charAt(0).toUpperCase() + g.name.slice(1));
+
     return {
         id: doc.id,
-        title: doc.name ?? '',
-        year: doc.year ?? 0,
+        title: doc.name,
+        year: doc.year,
         rating,
         poster,
-        genres: [],
+        genres,
+        movieLength: doc.movieLength ?? 0,
+        description: doc.description ?? '',
+        premiereWorld: doc.premiere?.world,
+        premiereRussia: doc.premiere?.russia,
     };
 }
 
-export async function getMovieList(pageNumber: number, limitNumber: number): Promise<MovieListPage> {
+export async function getMovieList(pageNumber: number, limitNumber: number, options?: string[]): Promise<MovieListPage> {
 
-    const query = [
+    const queryParts = [
         `/movie?page=${pageNumber}`,
         `limit=${limitNumber}`,
+        `type=movie`,
         `selectFields=id`,
         `selectFields=name`,
         `selectFields=year`,
         `selectFields=rating`,
+        `selectFields=genres`,
         `selectFields=poster`,
+        `selectFields=movieLength`,
         `notNullFields=poster.url`,
         `sortField=rating.kp`,
         `sortType=-1`,
-    ].join('&');
+    ];
+
+    for (const slug of options ?? []) {
+        const trimmed = slug.trim();
+
+        if (trimmed) {
+            queryParts.push(`genres.name=${encodeURIComponent(`+${trimmed}`)}`);
+        }
+    }
+
+    const query = queryParts.join("&");
 
     try {
         const { data } = await api.get<MovieListResponse>(query);
@@ -41,7 +65,7 @@ export async function getMovieList(pageNumber: number, limitNumber: number): Pro
         const docs = Array.isArray(data?.docs) ? data.docs : [];
 
         return {
-            movies: docs.map(mapListDocToMovie),
+            movies: docs.map(mapMoviesData),
             page: data?.page ?? pageNumber,
             pages: data?.pages ?? 0,
             total: data?.total ?? 0,
@@ -58,10 +82,11 @@ export async function getMovieList(pageNumber: number, limitNumber: number): Pro
     }
 }
 
-export async function getMovieDetails(id: string) {
+export async function getMovieDetails(id: string): Promise<MovieDetails | undefined> {
 
     const query = [
         `/movie?id=${id}`,
+        `selectFields=id`,
         `selectFields=name`,
         `selectFields=description`,
         `selectFields=rating`,
@@ -72,12 +97,12 @@ export async function getMovieDetails(id: string) {
     ].join('&');
 
     try {
-        const response = await api.get(query);
+        const { data } = await api.get<{ docs: MovieDocStructure[] }>(query);
 
-        if (response.data.docs.length === 0) return undefined;
+        if (!Array.isArray(data.docs) || data.docs.length === 0) return undefined;
 
-        return response.data.docs;
-    } catch (error){
+        return mapMoviesData(data.docs[0]);
+    } catch (error) {
         if (showErrorMessage) console.error('Ошибка получения подробной информации о фильме', error);
 
         return undefined;
