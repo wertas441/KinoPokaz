@@ -35,7 +35,6 @@ export default function MoviesPage() {
     const { isModalWindowOpen, toggleModalWindow } = useModalWindow();
 
     const {
-        nameFilter,
         genresFilter,
         fromYearFilter,
         toYearFilter,
@@ -45,18 +44,20 @@ export default function MoviesPage() {
         updateSearchParam,
     } = useMovieFilter();
 
-    const listOptions: MovieListRequestOptions = useMemo(() => ({
+    const listOptions: MovieListRequestOptions = useMemo(() => {
+
+        return {
             genres: genresFilter,
             fromYear: fromYearFilter,
             toYear: toYearFilter,
             fromRating: fromRatingFilter,
             toRating: toRatingFilter,
             sortBy: sortBy === "year" || sortBy === "title" ? sortBy : "rating",
-        }),
-        [genresFilter, fromYearFilter, toYearFilter, fromRatingFilter, toRatingFilter, sortBy],
-    );
+        }
+    }, [genresFilter, fromYearFilter, toYearFilter, fromRatingFilter, toRatingFilter, sortBy]);
 
     const usesNarrowingApiFilters = useMemo(() => {
+
         return (
             Boolean(fromYearFilter.trim()) ||
             Boolean(toYearFilter.trim()) ||
@@ -66,6 +67,7 @@ export default function MoviesPage() {
     }, [fromYearFilter, toYearFilter, fromRatingFilter, toRatingFilter]);
 
     const listFetchKey = useMemo(() => {
+
         const base = [
             [...genresFilter].sort().join("|"),
             fromYearFilter,
@@ -170,7 +172,6 @@ export default function MoviesPage() {
     const filteredMovies = useMemo(() => {
         return movies
             .filter((movie) => {
-                const matchesName = (movie.title ?? '').toLowerCase().includes(nameFilter.toLowerCase());
                 const matchesGenre =
                     genresFilter.length === 0 ||
                     genresFilter.every((slug) => movie.genres?.some((g) => g.toLowerCase() === slug));
@@ -181,7 +182,7 @@ export default function MoviesPage() {
                 const matchesFromRating = fromRatingFilter === "" || movie.rating >= parseFloat(fromRatingFilter);
                 const matchesToRating = toRatingFilter === "" || movie.rating <= parseFloat(toRatingFilter);
 
-                return matchesName && matchesGenre && matchesFromYear && matchesToYear && matchesFromRating && matchesToRating;
+                return matchesGenre && matchesFromYear && matchesToYear && matchesFromRating && matchesToRating;
             })
             .sort((a, b) => {
                 if (sortBy === "rating") return b.rating - a.rating;
@@ -190,7 +191,7 @@ export default function MoviesPage() {
                 return 0;
             });
 
-    }, [movies, nameFilter, genresFilter, fromYearFilter, toYearFilter, fromRatingFilter, toRatingFilter, sortBy]);
+    }, [movies, genresFilter, fromYearFilter, toYearFilter, fromRatingFilter, toRatingFilter, sortBy]);
 
     useEffect(() => {
         if (isLoading || !hasMore) return;
@@ -236,9 +237,6 @@ export default function MoviesPage() {
                     {!isLoading && (
                         <div className={styles.contentHeader}>
                             <div className={styles.contentHeaderTitles}>
-                                <h2 className={styles.contentTitle}>
-                                    Найдено: {filteredMovies.length}
-                                </h2>
 
                                 {totalInCatalog > 0 && (
                                     <p className={styles.contentSubtitle}>

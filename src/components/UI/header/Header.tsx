@@ -5,6 +5,7 @@ import { appNavItems } from "../../../lib";
 import { $compareMovies, openComparePanel } from "../../../lib/store/compareMovieStore.ts";
 
 export default function Header() {
+
     const compareMovies = useUnit($compareMovies);
     const compareCount = compareMovies.length;
 
@@ -45,7 +46,6 @@ export default function Header() {
                         }
                     >
                         Сравнение
-                        {compareCount > 0 ? <span className={styles.compareBadge}>{compareCount}</span> : null}
                     </button>
                 </div>
             </div>

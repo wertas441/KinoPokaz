@@ -6,8 +6,6 @@ export function useMovieFilter() {
 
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const nameFilter = searchParams.get("name") || "";
-
     const genresFilter = useMemo(() => {
         return searchParams
             .getAll("genre")
@@ -49,7 +47,6 @@ export function useMovieFilter() {
     const clearSearchParams = () => setSearchParams({});
 
     return {
-        nameFilter,
         genresFilter,
         fromYearFilter,
         toYearFilter,

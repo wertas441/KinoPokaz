@@ -6,7 +6,6 @@ import {MOVIE_GENRE_OPTIONS} from "../../../lib/utils/movie.ts";
 export default function MovieFilter() {
 
     const {
-        nameFilter,
         genresFilter,
         fromYearFilter,
         toYearFilter,
@@ -30,13 +29,6 @@ export default function MovieFilter() {
                     Сбросить
                 </button>
             </div>
-
-            <FilterInput
-                id="nameFilter"
-                placeholder="Поиск по названию..."
-                value={nameFilter}
-                onChange={(val) => updateSearchParam("name", val)}
-            />
 
             <div className={styles.filterSection}>
                 <span className={styles.label}>Жанры</span>

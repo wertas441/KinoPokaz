@@ -126,7 +126,7 @@ export default function MovieDetailsPage() {
                         <header className={styles.header}>
                             <h1 className={styles.title}>{movieData.title}</h1>
                             <div className={styles.metaRow}>
-                                {movieData.year > 0 && (
+                                {movieData.year > 0 && premiereLines.length === 0  && (
                                     <span className={styles.metaBadge}>{movieData.year}</span>
                                 )}
 

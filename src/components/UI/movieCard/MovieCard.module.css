@@ -91,6 +91,17 @@
     font-size: 14px;
 }
 
+.genres {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 .rating {
     position: absolute;
     top: var(--space-s);

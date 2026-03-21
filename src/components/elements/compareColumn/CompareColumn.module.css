@@ -22,8 +22,40 @@
 
 .row {
     display: grid;
-    grid-template-columns: 100px 1fr;
-    gap: 70px;
+    grid-template-columns: minmax(6.5rem, 34%) 1fr;
+    gap: var(--space-m);
     font-size: 14px;
     align-items: baseline;
+}
+
+.row dd {
+    word-break: break-word;
+}
+
+@media (max-width: 640px) {
+    .column {
+        padding: var(--space-s);
+        min-height: 120px;
+    }
+
+    .row {
+        grid-template-columns: 1fr;
+        gap: 2px;
+        align-items: start;
+    }
+
+    .row dt {
+        margin: 0;
+        font-size: 12px;
+        letter-spacing: 0.02em;
+    }
+
+    .row dd {
+        margin: 0 0 var(--space-s);
+        font-size: 14px;
+    }
+
+    .row:last-child dd {
+        margin-bottom: 0;
+    }
 }
