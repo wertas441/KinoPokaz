@@ -1,7 +1,7 @@
 import FilterInput from "../../inputs/filterInput/FilterInput.tsx";
 import styles from "./MovieFilter.module.css";
 import {useMovieFilter} from "../../../lib/hooks/useMovieFilter.ts";
-import {MOVIE_GENRE_OPTIONS} from "../../../lib/movieGenres.ts";
+import {MOVIE_GENRE_OPTIONS} from "../../../lib/utils/movie.ts";
 
 export default function MovieFilter() {
 

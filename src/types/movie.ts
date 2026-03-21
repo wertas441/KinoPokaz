@@ -52,3 +52,11 @@ export interface MovieListPage {
     total: number;
 }
 
+export interface MovieListRequestOptions {
+    genres?: string[];
+    fromYear?: string;
+    toYear?: string;
+    fromRating?: string;
+    toRating?: string;
+    sortBy?: "rating" | "year" | "title";
+}

@@ -1,6 +1,6 @@
 import {useMemo} from "react";
 import {useSearchParams} from "react-router";
-import {type MovieGenreSlug, parseGenreParam} from "../movieGenres.ts";
+import {type MovieGenreSlug, parseGenreParam} from "../utils/movie.ts";
 
 export function useMovieFilter() {
 

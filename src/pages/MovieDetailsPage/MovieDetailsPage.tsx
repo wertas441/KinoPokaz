@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import {useEffect, useLayoutEffect, useMemo, useState} from "react";
 import { Link, useParams } from "react-router-dom";
 import { getMovieDetails } from "../../lib/controllers/movie.ts";
 import type { MovieDetails } from "../../types/movie.ts";
 import styles from "./MovieDetailsPage.module.css";
-import {formatPremiereDate} from "../../lib";
+import {formatPremiereDate} from "../../lib/utils";
 
 export default function MovieDetailsPage() {
 
@@ -11,6 +11,10 @@ export default function MovieDetailsPage() {
 
     const [movieData, setMovieData] = useState<MovieDetails | undefined>();
     const [isLoading, setIsLoading] = useState(true);
+
+    useLayoutEffect(() => {
+        document.title = "Подробности о фильме | KinoPokaz";
+    }, []);
 
     useEffect(() => {
         if (!id) {

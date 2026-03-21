@@ -13,7 +13,7 @@ import { useModalWindow } from "../../lib/hooks/useModalWindow.ts";
 import ModalWindow from "../../components/UI/modalWindows/modalWindow/ModalWindow.tsx";
 import MovieFilter from "../../components/UI/movieFilter/MovieFilter.tsx";
 import {getMovieList} from "../../lib/controllers/movie.ts";
-import type {Movie} from "../../types/movie.ts";
+import type {Movie, MovieListRequestOptions} from "../../types/movie.ts";
 
 const PAGE_SIZE = 50;
 const LOAD_AHEAD_PX = "400px";
@@ -45,7 +45,39 @@ export default function MoviesPage() {
         updateSearchParam,
     } = useMovieFilter();
 
-    const genreKey = useMemo(() => [...genresFilter].sort().join("|"), [genresFilter]);
+    const listOptions: MovieListRequestOptions = useMemo(() => ({
+            genres: genresFilter,
+            fromYear: fromYearFilter,
+            toYear: toYearFilter,
+            fromRating: fromRatingFilter,
+            toRating: toRatingFilter,
+            sortBy: sortBy === "year" || sortBy === "title" ? sortBy : "rating",
+        }),
+        [genresFilter, fromYearFilter, toYearFilter, fromRatingFilter, toRatingFilter, sortBy],
+    );
+
+    const usesNarrowingApiFilters = useMemo(() => {
+        return (
+            Boolean(fromYearFilter.trim()) ||
+            Boolean(toYearFilter.trim()) ||
+            Boolean(fromRatingFilter.trim()) ||
+            Boolean(toRatingFilter.trim())
+        )
+    }, [fromYearFilter, toYearFilter, fromRatingFilter, toRatingFilter]);
+
+    const listFetchKey = useMemo(() => {
+        const base = [
+            [...genresFilter].sort().join("|"),
+            fromYearFilter,
+            toYearFilter,
+            fromRatingFilter,
+            toRatingFilter,
+        ].join("¦");
+
+        if (usesNarrowingApiFilters) return `${base}¦${sortBy}`;
+
+        return base;
+    }, [genresFilter, fromYearFilter, toYearFilter, fromRatingFilter, toRatingFilter, usesNarrowingApiFilters, sortBy]);
 
     useLayoutEffect(() => {
         document.title = "Каталог фильмов | KinoPokaz";
@@ -58,7 +90,7 @@ export default function MoviesPage() {
             setIsLoading(true);
 
             try {
-                const { movies, pages, page, total } = await getMovieList(1, PAGE_SIZE, genresFilter);
+                const { movies, pages, page, total } = await getMovieList(1, PAGE_SIZE, listOptions);
 
                 if (cancelled) return;
 
@@ -76,7 +108,7 @@ export default function MoviesPage() {
         return () => {
             cancelled = true;
         };
-    }, [genreKey, genresFilter]);
+    }, [listFetchKey, listOptions]);
 
     const loadNextPage = useCallback(async () => {
         if (loadMoreLock.current || !hasMore || isLoading || isLoadingMore) return;
@@ -85,7 +117,7 @@ export default function MoviesPage() {
         setIsLoadingMore(true);
 
         try {
-            const { movies, pages, page, total } = await getMovieList(listPage + 1, PAGE_SIZE, genresFilter);
+            const { movies, pages, page, total } = await getMovieList(listPage + 1, PAGE_SIZE, listOptions);
 
             setMovies((prev) => {
                 return [...prev, ...movies];
@@ -100,7 +132,7 @@ export default function MoviesPage() {
 
             setIsLoadingMore(false);
         }
-    }, [hasMore, isLoading, isLoadingMore, listPage, genresFilter]);
+    }, [hasMore, isLoading, isLoadingMore, listPage, listOptions]);
 
     const handleRequestAddFavorite = useCallback((movie: Movie) => {
         setPendingFavoriteMovie(movie);
@@ -232,7 +264,6 @@ export default function MoviesPage() {
                             </div>
                         </div>
                     )}
-
 
                     {isLoading ? (
                         <div
