@@ -1,6 +1,4 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import "./App.css";
-
 import LayoutWrapper from "../lib/LayoutWrapper.tsx";
 import HomePage from "../pages/HomePage/HomePage.tsx";
 import MoviesPage from "../pages/MoviesPage/MoviesPage.tsx";

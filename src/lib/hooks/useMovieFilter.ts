@@ -1,14 +1,13 @@
 import {useMemo} from "react";
 import {useSearchParams} from "react-router";
-import {type MovieGenreSlug, parseGenreParam} from "../movieGenres.ts";
+import {type MovieGenreSlug, parseGenreParam} from "../utils/movie.ts";
 
 export function useMovieFilter() {
 
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const nameFilter = searchParams.get("name") || "";
-
     const genresFilter = useMemo(() => {
+
         return searchParams
             .getAll("genre")
             .map(parseGenreParam)
@@ -49,7 +48,6 @@ export function useMovieFilter() {
     const clearSearchParams = () => setSearchParams({});
 
     return {
-        nameFilter,
         genresFilter,
         fromYearFilter,
         toYearFilter,

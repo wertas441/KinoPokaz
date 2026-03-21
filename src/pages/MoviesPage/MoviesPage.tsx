@@ -13,7 +13,7 @@ import { useModalWindow } from "../../lib/hooks/useModalWindow.ts";
 import ModalWindow from "../../components/UI/modalWindows/modalWindow/ModalWindow.tsx";
 import MovieFilter from "../../components/UI/movieFilter/MovieFilter.tsx";
 import {getMovieList} from "../../lib/controllers/movie.ts";
-import type {Movie} from "../../types/movie.ts";
+import type {Movie, MovieListRequestOptions} from "../../types/movie.ts";
 
 const PAGE_SIZE = 50;
 const LOAD_AHEAD_PX = "400px";
@@ -35,7 +35,6 @@ export default function MoviesPage() {
     const { isModalWindowOpen, toggleModalWindow } = useModalWindow();
 
     const {
-        nameFilter,
         genresFilter,
         fromYearFilter,
         toYearFilter,
@@ -45,7 +44,42 @@ export default function MoviesPage() {
         updateSearchParam,
     } = useMovieFilter();
 
-    const genreKey = useMemo(() => [...genresFilter].sort().join("|"), [genresFilter]);
+    const listOptions: MovieListRequestOptions = useMemo(() => {
+
+        return {
+            genres: genresFilter,
+            fromYear: fromYearFilter,
+            toYear: toYearFilter,
+            fromRating: fromRatingFilter,
+            toRating: toRatingFilter,
+            sortBy: sortBy === "year" || sortBy === "title" ? sortBy : "rating",
+        }
+    }, [genresFilter, fromYearFilter, toYearFilter, fromRatingFilter, toRatingFilter, sortBy]);
+
+    const usesNarrowingApiFilters = useMemo(() => {
+
+        return (
+            Boolean(fromYearFilter.trim()) ||
+            Boolean(toYearFilter.trim()) ||
+            Boolean(fromRatingFilter.trim()) ||
+            Boolean(toRatingFilter.trim())
+        )
+    }, [fromYearFilter, toYearFilter, fromRatingFilter, toRatingFilter]);
+
+    const listFetchKey = useMemo(() => {
+
+        const base = [
+            [...genresFilter].sort().join("|"),
+            fromYearFilter,
+            toYearFilter,
+            fromRatingFilter,
+            toRatingFilter,
+        ].join("¦");
+
+        if (usesNarrowingApiFilters) return `${base}¦${sortBy}`;
+
+        return base;
+    }, [genresFilter, fromYearFilter, toYearFilter, fromRatingFilter, toRatingFilter, usesNarrowingApiFilters, sortBy]);
 
     useLayoutEffect(() => {
         document.title = "Каталог фильмов | KinoPokaz";
@@ -58,7 +92,7 @@ export default function MoviesPage() {
             setIsLoading(true);
 
             try {
-                const { movies, pages, page, total } = await getMovieList(1, PAGE_SIZE, genresFilter);
+                const { movies, pages, page, total } = await getMovieList(1, PAGE_SIZE, listOptions);
 
                 if (cancelled) return;
 
@@ -76,7 +110,7 @@ export default function MoviesPage() {
         return () => {
             cancelled = true;
         };
-    }, [genreKey, genresFilter]);
+    }, [listFetchKey, listOptions]);
 
     const loadNextPage = useCallback(async () => {
         if (loadMoreLock.current || !hasMore || isLoading || isLoadingMore) return;
@@ -85,7 +119,7 @@ export default function MoviesPage() {
         setIsLoadingMore(true);
 
         try {
-            const { movies, pages, page, total } = await getMovieList(listPage + 1, PAGE_SIZE, genresFilter);
+            const { movies, pages, page, total } = await getMovieList(listPage + 1, PAGE_SIZE, listOptions);
 
             setMovies((prev) => {
                 return [...prev, ...movies];
@@ -100,7 +134,7 @@ export default function MoviesPage() {
 
             setIsLoadingMore(false);
         }
-    }, [hasMore, isLoading, isLoadingMore, listPage, genresFilter]);
+    }, [hasMore, isLoading, isLoadingMore, listPage, listOptions]);
 
     const handleRequestAddFavorite = useCallback((movie: Movie) => {
         setPendingFavoriteMovie(movie);
@@ -138,7 +172,6 @@ export default function MoviesPage() {
     const filteredMovies = useMemo(() => {
         return movies
             .filter((movie) => {
-                const matchesName = (movie.title ?? '').toLowerCase().includes(nameFilter.toLowerCase());
                 const matchesGenre =
                     genresFilter.length === 0 ||
                     genresFilter.every((slug) => movie.genres?.some((g) => g.toLowerCase() === slug));
@@ -149,7 +182,7 @@ export default function MoviesPage() {
                 const matchesFromRating = fromRatingFilter === "" || movie.rating >= parseFloat(fromRatingFilter);
                 const matchesToRating = toRatingFilter === "" || movie.rating <= parseFloat(toRatingFilter);
 
-                return matchesName && matchesGenre && matchesFromYear && matchesToYear && matchesFromRating && matchesToRating;
+                return matchesGenre && matchesFromYear && matchesToYear && matchesFromRating && matchesToRating;
             })
             .sort((a, b) => {
                 if (sortBy === "rating") return b.rating - a.rating;
@@ -158,7 +191,7 @@ export default function MoviesPage() {
                 return 0;
             });
 
-    }, [movies, nameFilter, genresFilter, fromYearFilter, toYearFilter, fromRatingFilter, toRatingFilter, sortBy]);
+    }, [movies, genresFilter, fromYearFilter, toYearFilter, fromRatingFilter, toRatingFilter, sortBy]);
 
     useEffect(() => {
         if (isLoading || !hasMore) return;
@@ -186,13 +219,13 @@ export default function MoviesPage() {
             <ModalWindow
                 isOpen={isModalWindowOpen}
                 onClose={closeFavoriteModal}
+                onConfirm={confirmAddFavorite}
                 title="Добавить в избранное?"
                 description={
                     pendingFavoriteMovie
                         ? `Вы уверены, что хотите добавить «${pendingFavoriteMovie.title}» (${pendingFavoriteMovie.year}) в избранное?`
                         : ""
                 }
-                onConfirm={confirmAddFavorite}
             />
 
             <div className={styles.container}>
@@ -204,9 +237,6 @@ export default function MoviesPage() {
                     {!isLoading && (
                         <div className={styles.contentHeader}>
                             <div className={styles.contentHeaderTitles}>
-                                <h2 className={styles.contentTitle}>
-                                    Найдено: {filteredMovies.length}
-                                </h2>
 
                                 {totalInCatalog > 0 && (
                                     <p className={styles.contentSubtitle}>
@@ -232,7 +262,6 @@ export default function MoviesPage() {
                             </div>
                         </div>
                     )}
-
 
                     {isLoading ? (
                         <div

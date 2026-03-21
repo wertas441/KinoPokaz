@@ -3,8 +3,10 @@ import type {
     MovieDetails,
     MovieDocStructure,
     MovieListPage,
+    MovieListRequestOptions,
     MovieListResponse
 } from "../../types/movie.ts";
+import {buildRatingKpQuery, buildYearQuery, getSortQueryParams} from "../utils/movie.ts";
 
 function mapMoviesData(doc: MovieDocStructure): MovieDetails {
 
@@ -14,8 +16,7 @@ function mapMoviesData(doc: MovieDocStructure): MovieDetails {
 
     const poster = doc.poster?.url ?? doc.poster?.previewUrl ?? '';
 
-    const genres = (doc.genres ?? [])
-        .map((g) => g.name.charAt(0).toUpperCase() + g.name.slice(1));
+    const genres = (doc.genres ?? []).map((g) => g.name.charAt(0).toUpperCase() + g.name.slice(1));
 
     return {
         id: doc.id,
@@ -31,7 +32,20 @@ function mapMoviesData(doc: MovieDocStructure): MovieDetails {
     };
 }
 
-export async function getMovieList(pageNumber: number, limitNumber: number, options?: string[]): Promise<MovieListPage> {
+function hasNarrowingFilters(options: MovieListRequestOptions): boolean {
+
+    return Boolean(
+        options.fromYear?.trim() ||
+        options.toYear?.trim() ||
+        options.fromRating?.trim() ||
+        options.toRating?.trim(),
+    );
+}
+
+export async function getMovieList(pageNumber: number, limitNumber: number, options: MovieListRequestOptions = {}): Promise<MovieListPage> {
+
+    const genres = options.genres ?? [];
+    const narrowing = hasNarrowingFilters(options);
 
     const queryParts = [
         `/movie?page=${pageNumber}`,
@@ -45,16 +59,34 @@ export async function getMovieList(pageNumber: number, limitNumber: number, opti
         `selectFields=poster`,
         `selectFields=movieLength`,
         `notNullFields=poster.url`,
-        `sortField=rating.kp`,
-        `sortType=-1`,
     ];
 
-    for (const slug of options ?? []) {
+    for (const slug of genres) {
         const trimmed = slug.trim();
 
         if (trimmed) {
             queryParts.push(`genres.name=${encodeURIComponent(`+${trimmed}`)}`);
         }
+    }
+
+    if (narrowing) {
+        const yearQ = buildYearQuery(options.fromYear, options.toYear);
+
+        if (yearQ) queryParts.push(`year=${encodeURIComponent(yearQ)}`);
+
+        const ratingQ = buildRatingKpQuery(options.fromRating, options.toRating);
+
+        if (ratingQ) queryParts.push(`rating.kp=${encodeURIComponent(ratingQ)}`);
+
+        const {field, type} = getSortQueryParams(options.sortBy ?? "rating");
+
+        queryParts.push(`sortField=${encodeURIComponent(field)}`);
+
+        queryParts.push(`sortType=${encodeURIComponent(type)}`);
+    } else {
+        queryParts.push(`sortField=rating.kp`);
+
+        queryParts.push(`sortType=-1`);
     }
 
     const query = queryParts.join("&");
