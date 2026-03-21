@@ -1,5 +1,6 @@
 import { createEvent, createStore } from "effector";
 import type { Movie } from "../../types/movie.ts";
+import {isCompareMovie} from "../utils/movie.ts";
 
 export interface CompareMovie {
     id: number;
@@ -18,13 +19,7 @@ function loadInitial(): CompareMovie[] {
         const parsed = JSON.parse(raw);
         if (!Array.isArray(parsed)) return [];
 
-        return parsed.filter(
-            (x): x is CompareMovie =>
-                typeof x === "object" &&
-                x !== null &&
-                typeof (x as CompareMovie).id === "number" &&
-                typeof (x as CompareMovie).title === "string",
-        );
+        return parsed.filter(isCompareMovie);
     } catch {
         return [];
     }
@@ -61,12 +56,6 @@ export const $comparePanelOpen = createStore(false)
 $compareMovies.watch((state) => {
     localStorage.setItem('compareMovies', JSON.stringify(state));
 });
-
-export const isInCompareCheck = (id: number) => {
-    const data = $compareMovies.getState();
-
-    return data.find((movie) => movie.id === id);
-}
 
 export function movieToCompareMovie(movie: Movie): CompareMovie {
 

@@ -1,8 +1,9 @@
-import { NavLink, Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useUnit } from "effector-react";
 import styles from "./Header.module.css";
 import { appNavItems } from "../../../lib";
 import { $compareMovies, openComparePanel } from "../../../lib/store/compareMovieStore.ts";
+import {MemoLink} from "../../../lib/utils";
 
 export default function Header() {
 
@@ -12,22 +13,20 @@ export default function Header() {
     return (
         <header className={styles.header}>
             <div className={styles.inner}>
-                <Link to="/" className={styles.brand} aria-label="KinoPokaz — на главную">
+                <MemoLink to="/" className={styles.brand} aria-label="KinoPokaz — на главную">
                     <span className={styles.logo} aria-hidden>
                         KP
                     </span>
 
                     <span className={styles.brandText}>KinoPokaz</span>
-                </Link>
+                </MemoLink>
 
                 <nav className={styles.nav} aria-label="Основная навигация">
                     {appNavItems.map((item) => (
                         <NavLink
                             key={item.id}
                             to={item.to}
-                            className={({ isActive }) =>
-                                `${styles.link} ${isActive ? styles.linkActive : ""}`.trim()
-                            }
+                            className={({ isActive }) => `${styles.link} ${isActive ? styles.linkActive : ""}`.trim()}
                         >
                             {item.label}
                         </NavLink>

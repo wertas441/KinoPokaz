@@ -1,0 +1,208 @@
+.page {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: var(--space-xl) var(--space-l) var(--space-2xl, 48px);
+    overflow-x: hidden;
+}
+
+.inner {
+    width: 100%;
+    max-width: 1120px;
+    min-width: 0;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.hero {
+    position: relative;
+    padding: var(--space-xl) 0 var(--space-2xl, 48px);
+    text-align: center;
+    overflow: hidden;
+}
+
+.heroGlow {
+    pointer-events: none;
+    position: absolute;
+    /* Без отрицательных % по горизонтали — иначе появляется горизонтальный скролл на узких экранах */
+    inset: -80px 0 40%;
+    background: radial-gradient(
+        ellipse 90% 55% at 50% 0%,
+        rgba(0, 119, 255, 0.22),
+        transparent 68%
+    );
+    z-index: 0;
+}
+
+.heroInner {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.title {
+    margin: 0;
+    font-size: clamp(22px, 5.5vw, 44px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.titleAccent {
+    background: linear-gradient(135deg, var(--text-primary) 0%, #94c4ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.lead {
+    margin: var(--space-m) auto 0;
+    max-width: 700px;
+    font-size: clamp(15px, 3.8vw, 17px);
+    line-height: 1.55;
+    color: var(--text-secondary);
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.ctaRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: center;
+    gap: var(--space-m);
+    margin-top: var(--space-xl);
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.btnPrimary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-s);
+    padding: 12px 22px;
+    border-radius: var(--radius-m);
+    border: 1px solid rgba(0, 119, 255, 0.5);
+    background: linear-gradient(145deg, rgba(0, 119, 255, 0.35), rgba(0, 119, 255, 0.15));
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 4px 24px rgba(0, 119, 255, 0.2);
+    box-sizing: border-box;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btnPrimary:hover {
+    background: linear-gradient(145deg, rgba(0, 119, 255, 0.45), rgba(0, 119, 255, 0.22));
+    border-color: rgba(0, 119, 255, 0.75);
+}
+
+.btnPrimary:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 3px;
+}
+
+.btnSecondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 22px;
+    border-radius: var(--radius-m);
+    border: 1px solid rgba(129, 140, 153, 0.35);
+    background: rgba(129, 140, 153, 0.08);
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    box-sizing: border-box;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btnSecondary:hover {
+    background: rgba(129, 140, 153, 0.14);
+    border-color: rgba(129, 140, 153, 0.5);
+}
+
+.btnSecondary:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 3px;
+}
+
+.heroNote {
+    margin: var(--space-l) 0 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+    opacity: 0.9;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.bottomCta {
+    margin-top: 30px;
+    padding: var(--space-xl) var(--space-l);
+    border-radius: var(--radius-l);
+    border: 1px solid rgba(0, 119, 255, 0.22);
+    background: linear-gradient(
+        160deg,
+        rgba(0, 119, 255, 0.12) 0%,
+        rgba(25, 25, 27, 0.9) 45%
+    );
+    text-align: center;
+}
+
+.bottomTitle {
+    margin: 0;
+    font-size: clamp(17px, 4.2vw, 20px);
+    font-weight: 700;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.bottomText {
+    margin: var(--space-s) auto 0;
+    max-width: 550px;
+    font-size: clamp(14px, 3.6vw, 15px);
+    line-height: 1.5;
+    color: var(--text-secondary);
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.bottomCta .ctaRow {
+    margin-top: var(--space-l);
+}
+
+@media (max-width: 600px) {
+    .page {
+        padding: var(--space-l) var(--space-m) var(--space-xl);
+    }
+
+    .hero {
+        padding: var(--space-m) 0 var(--space-l);
+    }
+
+    .ctaRow {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btnPrimary,
+    .btnSecondary {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .bottomCta {
+        margin-top: var(--space-l);
+        padding: var(--space-l) var(--space-m);
+    }
+}

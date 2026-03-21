@@ -219,13 +219,13 @@ export default function MoviesPage() {
             <ModalWindow
                 isOpen={isModalWindowOpen}
                 onClose={closeFavoriteModal}
+                onConfirm={confirmAddFavorite}
                 title="Добавить в избранное?"
                 description={
                     pendingFavoriteMovie
                         ? `Вы уверены, что хотите добавить «${pendingFavoriteMovie.title}» (${pendingFavoriteMovie.year}) в избранное?`
                         : ""
                 }
-                onConfirm={confirmAddFavorite}
             />
 
             <div className={styles.container}>

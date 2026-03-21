@@ -7,6 +7,7 @@ export function useMovieFilter() {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const genresFilter = useMemo(() => {
+
         return searchParams
             .getAll("genre")
             .map(parseGenreParam)

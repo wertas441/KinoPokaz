@@ -1,4 +1,5 @@
 import styles from './FIlterInput.module.css'
+import {memo} from "react";
 
 interface IProps {
     label?: string;
@@ -9,7 +10,7 @@ interface IProps {
     onChange: (value: string) => void;
 }
 
-export default function FilterInput({label, id, type = 'text', placeholder = '', value, onChange} : IProps) {
+function FilterInput({label, id, type = 'text', placeholder = '', value, onChange} : IProps) {
 
     return (
         <div className={styles.filterSection}>
@@ -31,3 +32,5 @@ export default function FilterInput({label, id, type = 'text', placeholder = '',
         </div>
     )
 }
+
+export default memo(FilterInput)

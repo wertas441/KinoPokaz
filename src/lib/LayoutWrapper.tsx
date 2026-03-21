@@ -5,11 +5,14 @@ import CompareMoviesModal from "../components/UI/modalWindows/compareMoviesModal
 import styles from "./LayoutWrapper.module.css";
 
 export default function LayoutWrapper({ children }: { children: ReactNode }) {
+
     return (
         <div className={styles.root}>
             <Header />
 
-            <div className={styles.content}>{children}</div>
+            <div className={styles.content}>
+                {children}
+            </div>
 
             <Footer />
 

@@ -12,10 +12,14 @@ export default function CompareColumn({ movie }: { movie: CompareMovie | null })
     if (!movie) {
         return (
             <div className={styles.column}>
-                <div className={styles.placeholder}>Добавьте фильм из каталога или избранного</div>
+                <div className={styles.placeholder}>
+                    Добавьте фильм из каталога или избранного
+                </div>
             </div>
         );
     }
+
+    const { title, year, rating, genres, movieLength } = movie;
 
     return (
         <div className={styles.column}>
@@ -23,31 +27,31 @@ export default function CompareColumn({ movie }: { movie: CompareMovie | null })
                 <div className={styles.row}>
                     <dt>Название</dt>
 
-                    <dd>{movie.title}</dd>
+                    <dd>{title}</dd>
                 </div>
 
                 <div className={styles.row}>
                     <dt>Год</dt>
 
-                    <dd>{movie.year > 0 ? movie.year : "—"}</dd>
+                    <dd>{year > 0 ? year : "—"}</dd>
                 </div>
 
                 <div className={styles.row}>
                     <dt>Рейтинг</dt>
 
-                    <dd>{Number.isFinite(movie.rating) ? movie.rating.toFixed(1) : "—"}</dd>
+                    <dd>{Number.isFinite(rating) ? rating.toFixed(1) : "—"}</dd>
                 </div>
 
                 <div className={styles.row}>
                     <dt>Продолжительность (в минутах)</dt>
 
-                    <dd>{movie.movieLength}</dd>
+                    <dd>{movieLength}</dd>
                 </div>
 
                 <div className={styles.row}>
                     <dt>Жанры</dt>
 
-                    <dd>{formatGenres(movie.genres)}</dd>
+                    <dd>{formatGenres(genres)}</dd>
                 </div>
             </dl>
         </div>

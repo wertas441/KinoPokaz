@@ -1,4 +1,5 @@
 import type {MovieListRequestOptions} from "../../types/movie.ts";
+import type {CompareMovie} from "../store/compareMovieStore.ts";
 
 export const MOVIE_GENRE_OPTIONS = [
     { slug: "драма", label: "Драма" },
@@ -65,4 +66,10 @@ export function getSortQueryParams(sortBy: MovieListRequestOptions["sortBy"]): R
     }
 }
 
+export function isCompareMovie(value: unknown): value is CompareMovie {
+    if (typeof value !== "object" || value === null) return false;
 
+    const o = value as Record<string, unknown>;
+
+    return typeof o.id === "number" && typeof o.title === "string";
+}

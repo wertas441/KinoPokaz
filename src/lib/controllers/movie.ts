@@ -16,8 +16,7 @@ function mapMoviesData(doc: MovieDocStructure): MovieDetails {
 
     const poster = doc.poster?.url ?? doc.poster?.previewUrl ?? '';
 
-    const genres = (doc.genres ?? [])
-        .map((g) => g.name.charAt(0).toUpperCase() + g.name.slice(1));
+    const genres = (doc.genres ?? []).map((g) => g.name.charAt(0).toUpperCase() + g.name.slice(1));
 
     return {
         id: doc.id,

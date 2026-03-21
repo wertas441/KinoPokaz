@@ -2,8 +2,9 @@ import FilterInput from "../../inputs/filterInput/FilterInput.tsx";
 import styles from "./MovieFilter.module.css";
 import {useMovieFilter} from "../../../lib/hooks/useMovieFilter.ts";
 import {MOVIE_GENRE_OPTIONS} from "../../../lib/utils/movie.ts";
+import {memo} from "react";
 
-export default function MovieFilter() {
+function MovieFilter() {
 
     const {
         genresFilter,
@@ -90,3 +91,5 @@ export default function MovieFilter() {
         </aside>
     );
 }
+
+export default memo(MovieFilter);

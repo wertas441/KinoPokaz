@@ -1,4 +1,5 @@
-
+import {memo} from "react";
+import {Link} from "react-router-dom";
 
 export function formatPremiereDate(iso?: string): string | undefined {
     if (!iso) return undefined;
@@ -13,3 +14,5 @@ export function formatPremiereDate(iso?: string): string | undefined {
         return undefined;
     }
 }
+
+export const MemoLink = memo(Link);

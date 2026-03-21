@@ -1,5 +1,5 @@
 import styles from './MovieCard.module.css'
-import { useMemo, useState } from "react";
+import {memo, useMemo, useState} from "react";
 import {Link} from "react-router-dom";
 
 interface IProps {
@@ -13,16 +13,17 @@ interface IProps {
     isInCompare?: boolean;
 }
 
-export default function MovieCard({
-    id,
-    poster,
-    title,
-    year,
-    rating,
-    genres,
-    isFavorite,
-    isInCompare = false,
-}: IProps) {
+function MovieCard(
+    {
+        id,
+        poster,
+        title,
+        year,
+        rating,
+        genres,
+        isFavorite,
+        isInCompare = false,
+    }: IProps) {
 
     const [isPosterBroken, setIsPosterBroken] = useState(false);
 
@@ -97,3 +98,5 @@ export default function MovieCard({
         </article>
     )
 }
+
+export default memo(MovieCard);
